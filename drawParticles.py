@@ -25,6 +25,8 @@ numberOfParticles = 100
 
 #initialise particles
 particles = [(100,100,0) for i in range(numberOfParticles)]
+print "drawParticles:" + str(particles)
+
 
 #function to move particles straight
 def moveParticles(cm):
