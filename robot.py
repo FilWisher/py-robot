@@ -34,9 +34,9 @@ def backwards(cm):
     interface.increaseMotorAngleReferences(motors, [-angle, -angle])
 
 def left(degree):
-    angle = cm * 0.17
+    angle = degree * 0.17
     interface.increaseMotorAngleReferences(motors, [angle, -angle])
 
 def right(degree):
-    angle = cm * 0.17
+    angle = degree * 0.17
     interface.increaseMotorAngleReferences(motors, [-angle, angle])
