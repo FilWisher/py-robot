@@ -18,4 +18,9 @@ while True:
 
 	time.sleep(0.05)
 
+def rotate_read(start,end):
+    for i in range(start,end):
+        robot.right(1)
+        print i, interface.getSensorValue(port)[0]
+
 interface.terminate()
