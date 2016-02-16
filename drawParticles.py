@@ -61,6 +61,8 @@ def drawSquare(cm):
                 print "drawParticles:" + str(particles)
                 print particles[0,2]
 
+drawSquare(100)
+
 """
 while True:
 	# Create a list of particles to draw. This list should be filled by tuples (x, y, theta).
