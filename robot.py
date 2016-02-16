@@ -24,19 +24,22 @@ motorParams.pidParameters.k_d = 0.0
 interface.setMotorAngleControllerParameters(motors[0],motorParams)
 interface.setMotorAngleControllerParameters(motors[1],motorParams)
 
+distance_correction = 0.45
+angle_correction = 0.05
+
 # go forwards
 def forwards(cm):
-    angle = cm * 0.45
+    angle = cm * distance_correction
     interface.increaseMotorAngleReferences(motors, [angle, angle])
 
 def backwards(cm):
-    angle = cm * 0.45
+    angle = cm * distance_correction
     interface.increaseMotorAngleReferences(motors, [-angle, -angle])
 
-def left(degree):
-    angle = degree * 0.17
+def left(degree, ):
+    angle = degree * angle_correction
     interface.increaseMotorAngleReferences(motors, [angle, -angle])
 
 def right(degree):
-    angle = degree * 0.17
+    angle = degree * angle_correction
     interface.increaseMotorAngleReferences(motors, [-angle, angle])
