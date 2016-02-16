@@ -1,8 +1,12 @@
 #### When placed facing and perpendicular to a smooth surface such as a wall, what are the minimum and maximum depths that the sensor can reliably measure?
 
 The sensor is 12cm away from the center of the robot.
+
 The minimum depth the sensor can reliably measure is 1cm.
-The maximum depth the sensor can reliably measure is 210cm
+
+The maximum depth the sensor can reliably measure is 210cm.
+
+Our metric for reliable measurement is simply whether the value is stable and reasonable. For example when the sensor is very very close to the wall it reads 255 which is clearly wrong. Also when the sensor is over 2 meters away from the wall it gets stuck at 255 which indicates the measurement is no longer correct.
 
 ##### A test to check how sensor value changes with distance
 | Distance (cm) | Sensor Value (0-255) | Difference |
