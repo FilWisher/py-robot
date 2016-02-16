@@ -37,7 +37,7 @@ def moveParticles(cm):
                 e = getRandomX()
                 f = getRandomTheta()
 
-                particles[i] = [(x + (cm + e)*cos(deg2rad(theta))), (y + (cm + e)*sin(deg2rad(theta))), (theta + f)]
+                particles[i] = [(x + (cm + e)*np.cos(deg2rad(theta))), (y + (cm + e)*np.sin(deg2rad(theta))), (theta + f)]
 
 
 #function to rotate particles deg degrees
