@@ -1,8 +1,9 @@
+import time
+import sys
 import random
-import numpy as np
 
 c = 0;
-sigmaX = sigmaY = 4.8
+sigmaX = sigmaY = 0.2
 sigmaT = 0.01
 
 def getRandomX():
@@ -36,7 +37,7 @@ def moveParticles(cm):
                 e = getRandomX()
                 f = getRandomTheta()
 
-                particles[i] = ((x + (cm + e)*np.cos(np.deg2rad(theta))), (y + (cm + e)*np.sin(np.deg2rad(theta))), (theta + f))
+                particles[i] = [(x + (cm + e)*cos(deg2rad(theta))), (y + (cm + e)*sin(deg2rad(theta))), (theta + f)]
 
 
 #function to rotate particles deg degrees
@@ -48,7 +49,7 @@ def rotateParticles(deg):
                 
                 f = getRandomTheta()
 
-                particles[i] = (x, y, theta + deg + f)
+                particles[i] = [(x), (y), (theta + deg + f)]
         
 
 #function to draw a square
@@ -58,5 +59,6 @@ def drawSquare(cm):
                 moveParticles(100)
                 rotateParticles(90)
                 print "drawParticles:" + str(particles)
+                print particles[0,2]
 
 drawSquare(100)
