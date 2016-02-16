@@ -1,5 +1,6 @@
 import random
 import numpy as np
+import time
 
 c = 0;
 sigmaX = sigmaY = 4.8
@@ -58,5 +59,6 @@ def drawSquare(cm):
                 moveParticles(100)
                 rotateParticles(90)
                 print "drawParticles:" + str(particles)
+                time.sleep(1)
 
 drawSquare(100)
