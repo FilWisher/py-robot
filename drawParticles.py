@@ -68,4 +68,5 @@ def drawSquare(cm,move_robot=False):
                 rotateParticles(90)
                 print "drawParticles:" + str(particles)
 
-drawSquare(10,True)
+drawSquare(50,False)
+#drawSquare(10,True)
