@@ -3,7 +3,7 @@ import robot
 
 
 
-def navigatetoWaypoint(X,Y):
+def navigateToWaypoint(X,Y):
 
 
     #assuming robot is at (0,0,0) 
@@ -19,7 +19,7 @@ def navigatetoWaypoint(X,Y):
     theta_rad = np.arccos(cos_theta)
     
     #turn theta into degrees
-    theta_deg = theta_rad * 360 / 2* np.pi
+    theta_deg = theta_rad * 360.0 / (2.0* np.pi)
 
     #call function that rotates robot by theta_deg degrees
     robot.left(theta_deg)
