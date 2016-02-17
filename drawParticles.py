@@ -4,7 +4,7 @@ import time
 import robot
 
 c = 0;
-sigmaX = sigmaY = 1
+sigmaX = sigmaY = 1.6
 sigmaT = 0.1
 
 def getRandomX():
