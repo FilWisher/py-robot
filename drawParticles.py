@@ -1,10 +1,11 @@
 import random
 import numpy as np
 import time
+import robot
 
 c = 0;
-sigmaX = sigmaY = 4.8
-sigmaT = 0.01
+sigmaX = sigmaY = 1
+sigmaT = 0.1
 
 def getRandomX():
     return random.gauss(0,sigmaX)
@@ -36,8 +37,12 @@ def moveParticles(cm):
                 x,y,theta = particles[i]
                 e = getRandomX()
                 f = getRandomTheta()
-
+                
                 particles[i] = ((x + (cm + e)*np.cos(np.deg2rad(theta))), (y + (cm + e)*np.sin(np.deg2rad(theta))), (theta + f))
+                nx,ny,ntheta = particles[i]
+                if(i == 0):
+                    line = (x, y, nx, ny)
+                    print "drawLine:" + str(line)
 
 
 #function to rotate particles deg degrees
@@ -53,12 +58,14 @@ def rotateParticles(deg):
         
 
 #function to draw a square
-def drawSquare(cm):
-
+def drawSquare(cm,move_robot=False):
+        scaling_factor = 10
         for i in range(4):
-                moveParticles(100)
+                if(move_robot):
+                    robot.forwards(cm)
+                    robot.right(90)
+                moveParticles(cm*scaling_factor) 
                 rotateParticles(90)
                 print "drawParticles:" + str(particles)
-                time.sleep(1)
 
-drawSquare(100)
+drawSquare(20,True)

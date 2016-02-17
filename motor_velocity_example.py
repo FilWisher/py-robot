@@ -24,7 +24,7 @@ motorParams.pidParameters.k_d = 0.0
 interface.setMotorAngleControllerParameters(motors[0],motorParams)
 interface.setMotorAngleControllerParameters(motors[1],motorParams)
 
-interface.setMotorRotationSpeedReferences(motors,[speed,speed])
+interface.setMotorRotationSpeedReferences(motors,[speed,speed*0])
 
 print "Press Ctrl+C to exit"
 while True:
