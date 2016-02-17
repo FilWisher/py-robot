@@ -5,7 +5,7 @@ import robot
 
 c = 0;
 sigmaX = sigmaY = 1.6
-sigmaT = 0.3
+sigmaT = 0.2
 
 def getRandomX():
     return random.gauss(0,sigmaX)
