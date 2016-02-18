@@ -1,5 +1,6 @@
 import sys
 import numpy as np
+import robot
 
 def planning(current_loc,goal):
 
@@ -12,6 +13,11 @@ def planning(current_loc,goal):
 
     d = np.sqrt(dx**2+dy**2)
     d_theta =  np.rad2deg(np.arctan2(dy,dx))-theta_c
+    if(d_theta > 180):
+	d_theta -= 360
+    elif(d_theta < -180):
+	d_theta += 360
+	
     robot.left(d_theta)
     robot.forwards(d)
 

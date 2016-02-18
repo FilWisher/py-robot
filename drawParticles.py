@@ -60,15 +60,15 @@ def rotateParticles(deg):
         
 
 #function to draw a square
-def drawSquare(cm,move_robot=False):
+def drawSquare(cm):
         scaling_factor = 10
         for i in range(4):
-                if(move_robot):
-                    robot.forwards(cm)
-                    robot.right(90)
-                moveParticles(cm*scaling_factor) 
-                rotateParticles(90)
+            for j in xrange(4):
+                robot.forwards(cm/4)
+                time.sleep(0.1)
+                moveParticles(cm*scaling_factor/4)
                 print "drawParticles:" + str(particles)
+            robot.left(90)
+            rotateParticles(90)
 
-#drawSquare(50,False)
-drawSquare(50,True)
+drawSquare(40)
