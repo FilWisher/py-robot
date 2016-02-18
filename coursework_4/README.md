@@ -21,6 +21,7 @@ Our metric for reliable measurement is simply whether the value is stable and re
 | 210           | 211                  | 1          |
 
 ####  Move the sonar so that it faces the wall at a non-orthogonal incidence angle. What is the maximum angular deviation from perpendicular to the wall at which it will still give sensible readings?
+![alt text](figure_1.png "Plot")
 
 ####  Do your sonar depth measurements have any systematic (non-zero mean) errors? To test this, set up the sensor at a range of hand-measured depths (20cm, 40cm, 60cm, 80cm, 100cm) from a wall and record depth readings. Are they consistently above or below what they should be?
 
