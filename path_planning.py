@@ -29,8 +29,6 @@ def navigateToWaypoint(X,Y):
     robot.forwards(d)
 
 
-path_planning((0,0,0),(0,-1))
-888
 def path_planning(current_loc, goal):
 
     #need to translate our frame of reference
