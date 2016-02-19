@@ -26,5 +26,18 @@ Our metric for reliable measurement is simply whether the value is stable and re
 ####  Do your sonar depth measurements have any systematic (non-zero mean) errors? To test this, set up the sensor at a range of hand-measured depths (20cm, 40cm, 60cm, 80cm, 100cm) from a wall and record depth readings. Are they consistently above or below what they should be?
 
 ####  What is the the accuracy of the sonar sensor and does it depend on depth? At each of two chosen hand-measured depths (40cm and 100cm), make 10 separate depth measurements (each time picking up and replacing the sensor) and record the values. Do you observe the same level of scatter in each case?
+##### 40 cm
+| Sensor Value 40cm | Sensor Value 100cm |
+|-------------------|--------------------|
+| 41                | 102                |
+| 42                | 101                |
+| 41                | 102                |
+| 41                | 102                |
+| 42                | 102                |
+| 41                | 103                |
+| 42                | 101                |
+| 41                | 102                |
+| 43                | 102                |
+| 41                | 103                |
 
 ####  In a range of general conditions for robot navigation, what fraction of the time do you think your sonar gives garbage readings very far from ground truth?
