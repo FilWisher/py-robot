@@ -40,4 +40,8 @@ Our metric for reliable measurement is simply whether the value is stable and re
 | 43                | 102                |
 | 41                | 103                |
 
+40 cm mean:  Mean	41.5 Standard Deviation 0.6708203932
+100 cm mean: Mean	102 Standard Deviation  0.632455532
+
+
 ####  In a range of general conditions for robot navigation, what fraction of the time do you think your sonar gives garbage readings very far from ground truth?
