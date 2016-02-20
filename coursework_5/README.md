@@ -30,6 +30,7 @@ above 10cm and below 25cm to be sure that it ‘sees’ all the walls of the env
 * Navigate the given sequence of waypoints while doing MCL.
 
 ## Miscellaneous things to do for next week
+* Split up the tasks/make a plan.
 * Don't erase the particle cloud at each movement
 * Change the line we draw to be the ideal line, not just the trajectory of particle 0.
 * Instead of shutting down by unplugging the battery when it loses connection, we could plug in a keyboard and type `pi, PASSWORD, sudo reboot` or `pi, PASSWORD, sudo shutdown now`
