@@ -1,10 +1,11 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 
 # Some suitable functions and data structures for drawing a map and particles
 
 import time
 import random
 import math
+import numpy as np
 
 # Functions to generate some dummy particles data:
 def calcX():
@@ -64,12 +65,12 @@ class Map:
 # Simple Particles set
 class Particles:
     def __init__(self):
-        self.n = 10;    
+        self.n = 10;
         self.data = [];
 
     def update(self):
         self.data = [(calcX(), calcY(), calcTheta(), calcW()) for i in range(self.n)];
-    
+
     def draw(self):
         canvas.drawParticles(self.data);
 
@@ -97,9 +98,27 @@ mymap.draw();
 
 particles = Particles();
 
-t = 0;
-while True:
-    particles.update();
-    particles.draw();
-    t += 0.05;
-    time.sleep(0.05);
+def calculate_distance_from_wall(particle, wall):
+    weight, x, y, theta = particle
+    theta_rad = np.deg2rad(theta)
+    a_x, a_y, b_x, b_y = wall
+    numerator = (b_y - a_y)*(a_x - x) - (b_x - a_x)*(a_y - y)
+    denominator = (b_y - a_y)*math.cos(theta_rad) - (b_x - a_x)*math.sin(theta_rad)
+    return numerator/denominator
+
+test_particles = [(0.5,0,0,0), (0.5,1,1,0)]
+test_measurement = 8
+test_wall = (10,-10,10,10)
+sigma = 2
+for p in test_particles:
+    difference = calculate_distance_from_wall(p,test_wall)-test_measurement
+    print np.exp(-((difference)**2)/(2*sigma*sigma))
+
+
+
+# t = 0;
+# while True:
+#     particles.update();
+#     particles.draw();
+#     t += 0.05;
+#     time.sleep(0.05);
