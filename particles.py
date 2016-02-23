@@ -110,7 +110,7 @@ class Particles:
             r = random.random()
             sum = 0
             for particle in self.particles:
-                x, y, theta, weight = particles
+                x, y, theta, weight = particle
                 sum += weight
                 if (sum >= r):
                     samples.append((x, y, theta, 1.0/float(particles_count)))
