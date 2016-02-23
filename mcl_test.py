@@ -13,7 +13,7 @@ numberOfParticles = 100
 
 #initialise particles
 particleHistory = []
-walls = [(0,0,0,10),(0,10,10,10),(10,10,10,0),(10,0,0,0)]
+walls = [(0,0,0,100),(0,100,100,100),(100,100,100,0),(100,0,0,0)]
 print "drawParticles:" + str(particles.particles)
 
 def drawWalls():
