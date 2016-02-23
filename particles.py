@@ -78,7 +78,7 @@ class Particles:
 
     def update_weights(self,walls,measurement):
         for i in xrange(len(self.particles)):
-            difference = self.get_distance_to_closest_wall(particle, walls) - measurement
+            difference = self.g;(particle, walls) - measurement
             likelihood = np.exp(-((difference)**2)/(2*sigma*sigma))
             x, y, theta, weight = self.particles[i]
             self.particles[i] = (x, y, theta, weight*likelihood)
