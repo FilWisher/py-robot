@@ -110,6 +110,7 @@ class Particles:
                     samples.append((x, y, theta, 1.0/float(particles_count)))
                     break
         for i in xrange(0,particles_count):
+            print i
             self.particles[i] = samples[i]
 
     def left(self, deg):

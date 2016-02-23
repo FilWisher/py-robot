@@ -2,35 +2,47 @@ import random
 import numpy as np
 import time
 import robot
-import particles as p
 
-particles = p.Particles((10,10,0), 100)
-c = 0
+c = 0;
 sigmaX = sigmaY = 1.6
 sigmaT = 0.2
 
+def getRandomX():
+    return random.gauss(0,sigmaX)
+
+def getRandomY():
+    return random.gauss(0,sigmaY)
+
+def getRandomTheta():
+    return random.gauss(0,sigmaT)
+
 numberOfParticles = 100
 
+#line1 = (10, 10, 10, 500) # (x0, y0, x1, y1)
+#line2 = (20, 20, 500, 200)  # (x0, y0, x1, y1)
+
+#print "drawLine:" + str(line1)
+#print "drawLine:" + str(line2)
+
 #initialise particles
+particles = [(100,100,0) for i in range(numberOfParticles)]
 particleHistory = []
-walls = [(0,0,0,1000),(0,1000,1000,1000),(1000,1000,1000,0),(1000,0,0,0)]
-print "drawParticles:" + str(particles.particles)
+print "drawParticles:" + str(particles)
 
-def drawWalls():
-    for wall in walls:
-        print "drawLine:" + str(wall)
-    
-def moveParticles(cm):
-    particles.forwards(cm)
-    saveParticles()
-    print "drawParticles:" + str(particleHistory)
 
-def turnParticles(deg):
-    particles.left(deg)
-    saveParticles()
-    print "drawParticles:" + str(particleHistory)
-  
-"""
+def Mean(listOfTuples):
+    xSum = 0
+    ySum = 0
+    thetaSum = 0
+    numberOfTuples = len(listOfTuples)
+    for t in listOfTuples:
+        x, y, theta = t
+        xSum += x
+        ySum += y
+        thetaSum += theta
+
+    return (xSum/numberOfTuples, ySum/numberOfTuples, thetaSum/numberOfTuples)
+
 #function to move particles straight
 def moveParticles(cm):
         initialPosition = Mean(particles)
@@ -74,34 +86,8 @@ def drawSquare(cm):
             robot.left(90)
             rotateParticles(90)
 
-"""
 def saveParticles():
-    for p in particles.particles:
+    for p in particles:
         particleHistory.append(p)
-norm = True
-drawWalls()
-moveParticles(500)
-if norm is True:
-    particles.update_weights(walls, 48)
-    particles.normalize()
-    particles.resample()
-turnParticles(90)
-moveParticles(500)
-if norm is True:
-    particles.update_weights(walls, 48)
-    particles.normalize()
-    particles.resample()
-turnParticles(90)
-moveParticles(500)
-if norm is True:
-    particles.update_weights(walls, 48)
-    particles.normalize()
-    particles.resample()
-turnParticles(90)
-moveParticles(500)
-if norm is True:
-    particles.update_weights(walls, 48)
-    particles.normalize()
-    particles.resample()
-turnParticles(90)
 
+drawSquare(40)

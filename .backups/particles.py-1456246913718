@@ -103,13 +103,14 @@ class Particles:
         for i in xrange(particles_count):
             r = random.random()
             sum = 0
-            for particle in self.particles:
+            for particle in range(self.particles):
                 x, y, theta, weight = particles
                 sum += weight
                 if (sum >= r):
                     samples.append((x, y, theta, 1.0/float(particles_count)))
                     break
         for i in xrange(0,particles_count):
+            print i
             self.particles[i] = samples[i]
 
     def left(self, deg):

@@ -90,7 +90,6 @@ class Particles:
             sum += particle[3]
         for i in xrange(len(self.particles)):
             x, y, theta, weight = self.particles[i]
-            print type(weight), type(sum)
             self.particles[i] = (x, y, theta, weight / sum)
 
     def resample(self):
@@ -103,8 +102,8 @@ class Particles:
         for i in xrange(particles_count):
             r = random.random()
             sum = 0
-            for particle in self.particles:
-                x, y, theta, weight = particles
+            for j in xrange(len(self.particles)):
+                x, y, theta, weight = self.particles[j]
                 sum += weight
                 if (sum >= r):
                     samples.append((x, y, theta, 1.0/float(particles_count)))

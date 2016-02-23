@@ -81,27 +81,8 @@ def saveParticles():
 norm = True
 drawWalls()
 moveParticles(500)
-if norm is True:
+if norm:
     particles.update_weights(walls, 48)
     particles.normalize()
     particles.resample()
 turnParticles(90)
-moveParticles(500)
-if norm is True:
-    particles.update_weights(walls, 48)
-    particles.normalize()
-    particles.resample()
-turnParticles(90)
-moveParticles(500)
-if norm is True:
-    particles.update_weights(walls, 48)
-    particles.normalize()
-    particles.resample()
-turnParticles(90)
-moveParticles(500)
-if norm is True:
-    particles.update_weights(walls, 48)
-    particles.normalize()
-    particles.resample()
-turnParticles(90)
-

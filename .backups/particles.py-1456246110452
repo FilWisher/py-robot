@@ -85,12 +85,11 @@ class Particles:
             self.particles[i] = (x, y, theta, weight*likelihood)
 
     def normalize(self):
-        sum = 0.0;
+        sum = 0;
         for particle in self.particles:
             sum += particle[3]
         for i in xrange(len(self.particles)):
             x, y, theta, weight = self.particles[i]
-            print type(weight), type(sum)
             self.particles[i] = (x, y, theta, weight / sum)
 
     def resample(self):
@@ -103,13 +102,12 @@ class Particles:
         for i in xrange(particles_count):
             r = random.random()
             sum = 0
-            for particle in self.particles:
-                x, y, theta, weight = particles
+            for j in xrange(len(self.particles)):
+                x, y, theta, weight = self.particles[j]
                 sum += weight
-                if (sum >= r):
+                if (sum > r):
                     samples.append((x, y, theta, 1.0/float(particles_count)))
-                    break
-        for i in xrange(0,particles_count):
+        for i in xrange(particles_count):
             self.particles[i] = samples[i]
 
     def left(self, deg):
