@@ -13,7 +13,7 @@ def getRandomX():
 def getRandomY():
     return random.gauss(0,sigmaY)
 
-def getRandomTheta(): 
+def getRandomTheta():
     return random.gauss(0,sigmaT)
 
 numberOfParticles = 100
@@ -26,6 +26,7 @@ numberOfParticles = 100
 
 #initialise particles
 particles = [(100,100,0) for i in range(numberOfParticles)]
+particleHistory = []
 print "drawParticles:" + str(particles)
 
 
@@ -38,7 +39,7 @@ def moveParticles(cm):
                 e = getRandomX()
                 f = getRandomTheta()
 
-                
+
                 particles[i] = ((x + (cm + e)*np.cos(np.deg2rad(theta))), (y + (cm + e)*np.sin(np.deg2rad(theta))), (theta + f))
                 nx,ny,ntheta = particles[i]
                 if(i == 0):
@@ -49,15 +50,15 @@ def moveParticles(cm):
 
 #function to rotate particles deg degrees
 def rotateParticles(deg):
-        
+
         #update particle position after moving cm distance
         for i in range(numberOfParticles):
                 x,y,theta = particles[i]
-                
+
                 f = getRandomTheta()
 
                 particles[i] = (x, y, theta + deg + f)
-        
+
 
 #function to draw a square
 def drawSquare(cm):
@@ -67,8 +68,13 @@ def drawSquare(cm):
                 robot.forwards(cm/4)
                 time.sleep(0.1)
                 moveParticles(cm*scaling_factor/4)
-                print "drawParticles:" + str(particles)
+                saveParticles()
+                print "drawParticles:" + str(particleHistory)
             robot.left(90)
             rotateParticles(90)
+
+def saveParticles():
+    for p in particles:
+        particleHistory.append(p)
 
 drawSquare(40)
