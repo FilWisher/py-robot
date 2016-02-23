@@ -93,6 +93,7 @@ mymap.add_wall((84,210,168,210));   # d
 mymap.add_wall((168,210,168,84));   # e
 mymap.add_wall((168,84,210,84));    # f
 mymap.add_wall((210,84,210,0));     # g
+sigma = 2
 mymap.add_wall((210,0,0,0));        # h
 mymap.draw();
 
@@ -109,10 +110,36 @@ def calculate_distance_from_wall(particle, wall):
 test_particles = [(0.5,0,0,0), (0.5,1,1,0)]
 test_measurement = 8
 test_wall = (10,-10,10,10)
-sigma = 2
 for p in test_particles:
     difference = calculate_distance_from_wall(p,test_wall)-test_measurement
     print np.exp(-((difference)**2)/(2*sigma*sigma))
+
+def update_weights(particles):
+    for i in xrange(len(particles)):
+        difference = calculate_distance_from_wall(p,test_wall)-test_measurement
+        likelihood = np.exp(-((difference)**2)/(2*sigma*sigma))
+        weight, x, y, theta = particles[i]
+        particles[i] = (weight*likelihood, x, y, theta)
+
+def normalize_weights(particles):
+    sum = 0;
+    for particle in particles:
+        sum += particle[0]
+    for i in xrange(len(particles)):
+        weight, x, y, theta = particles[i]
+        particles[i] = (weight / sum, x, y, theta)
+
+def resample(particles, N):
+    samples = []
+    for i in xrange(N):
+        r = random.random()
+        sum = 0;
+        for j in xrange(len(particles)):
+            sum += particles[j]
+            if (sum > r):
+                samples[j] = particles[j]
+    for i in xrange(len(samples)):
+        particles[i] = samples[i];
 
 
 
