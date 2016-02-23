@@ -130,21 +130,6 @@ def normalize_weights(particles):
         particles[i] = (weight / sum, x, y, theta)
 
 def resample(particles, N):
-    samples = []
-    for i in xrange(N):
-        r = random.random()
-        sum = 0;
-        for j in xrange(len(particles)):
-            sum += particles[j]
-            if (sum > r):
-                samples[j] = particles[j]
-    for i in xrange(len(samples)):
-        particles[i] = samples[i];
-
-
-
-
-def resample(particles, N):
     """
     Resample N new particles with weight 1/N with distribution
     determined by weight of particles
@@ -160,7 +145,7 @@ def resample(particles, N):
                 samples[i] = (1/N, x, y, theta)
     for i in xrange(len(samples)):
         particles[i] = samples[i]
-                
+
 
 # t = 0;
 # while True:
