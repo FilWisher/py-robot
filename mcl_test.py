@@ -19,6 +19,15 @@ print "drawParticles:" + str(particles.particles)
 def drawWalls():
   for wall in walls:
     print "drawLine:" + str(wall)
+    
+def moveParticles(cm):
+  particles.forwards(cm)
+  print "drawParticles:" + str(particles.particles)
+
+def turnParticles(deg):
+  particles.left(deg)
+  print "drawParticles:" + str(particles.particles)
+  
 """
 #function to move particles straight
 def moveParticles(cm):
@@ -69,3 +78,6 @@ def saveParticles():
 
 """
 drawWalls()
+for i in range(4):
+  particles.forwards(50)
+  particles.left(-90)
