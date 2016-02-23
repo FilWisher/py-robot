@@ -88,10 +88,16 @@ class Particles:
         sum = 0.0;
         for particle in self.particles:
             sum += particle[3]
-        for i in xrange(len(self.particles)):
-            x, y, theta, weight = self.particles[i]
-            print type(weight), type(sum)
-            self.particles[i] = (x, y, theta, weight / sum)
+        if(sum != 0):
+            for i in xrange(len(self.particles)):
+                x, y, theta, weight = self.particles[i]
+                print type(weight), type(sum)
+                self.particles[i] = (x, y, theta, weight / sum)
+        else:
+            print "you've really fucked up here"
+            for i in xrange(len(self.particles)):
+                x, y, theta, weight = self.particles[i]
+                self.particles[i] = (x, y, theta, 1.0 / float(len(self.particles)) )
 
     def resample(self):
         """
