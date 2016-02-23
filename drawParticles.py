@@ -18,21 +18,28 @@ def getRandomTheta():
 
 numberOfParticles = 100
 
-#line1 = (10, 10, 10, 500) # (x0, y0, x1, y1)
-#line2 = (20, 20, 500, 200)  # (x0, y0, x1, y1)
-
-#print "drawLine:" + str(line1)
-#print "drawLine:" + str(line2)
-
 #initialise particles
 particles = [(100,100,0) for i in range(numberOfParticles)]
 particleHistory = []
 print "drawParticles:" + str(particles)
 
 
+def Mean(listOfTuples):
+    xSum = 0
+    ySum = 0
+    thetaSum = 0
+    numberOfTuples = len(listOfTuples)
+    for t in listOfTuples:
+        x, y, theta = t
+        xSum += x
+        ySum += y
+        thetaSum += theta
+
+    return (xSum/numberOfTuples, ySum/numberOfTuples, thetaSum/numberOfTuples)
+
 #function to move particles straight
 def moveParticles(cm):
-
+        initialPosition = Mean(particles)
         #update particle position after moving cm distance
         for i in range(numberOfParticles):
                 x,y,theta = particles[i]
@@ -42,9 +49,9 @@ def moveParticles(cm):
 
                 particles[i] = ((x + (cm + e)*np.cos(np.deg2rad(theta))), (y + (cm + e)*np.sin(np.deg2rad(theta))), (theta + f))
                 nx,ny,ntheta = particles[i]
-                if(i == 0):
-                    line = (x, y, nx, ny)
-                    print "drawLine:" + str(line)
+        newPosition = Mean(particles)
+        line = (initialPosition[0], initialPosition[1], newPosition[0], newPosition[1])
+        print "drawLine:" + str(line)
 
 
 
