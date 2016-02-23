@@ -41,6 +41,19 @@ class Particles:
 
         return minimum_distance
 
+    # #FIX THIS - NEED TO FIX TUPLE OF MEAN PARTICLES AND GET RELEVANT WALL TO PASS TO THIS function
+    # def calculate_shortest_distance_from_wall(self,particle,wall):
+    #     # Used https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line
+    #     x0, y0, theta = particle
+    #     theta_rad = np.deg2rad(theta)
+    #     x1, y1, x2, y2 = walls[0]
+    #     numerator = np.abs( (y2 - y1)*x0 - (x2 - x1)*y0 + x2*y1 - y2*x1 )
+    #     denominator = np.sqrt((y2-y1)**2 + (x2 - x1)**2)
+    #     if denominator == 0:
+    #         print 'Warning! Found wall of zero length!'
+    #         return -1
+    #     return numerator/denominator
+
 
     def calculate_distance_from_wall(self,particle, wall):
         x, y, theta, weight = particle
@@ -84,6 +97,18 @@ class Particles:
             x, y, theta, weight = self.particles[i]
             self.particles[i] = (x, y, theta, weight*likelihood)
 
+    # def check_measurement_is_safe(self,walls):
+    #     mean_particle = self.mean()
+    #     short_distance_to_wall = self.calculate_shortest_distance_from_wall(mean_particle, walls)
+    #     distance_to_wall = self.calculate_distance_from_wall(mean_particle, walls)
+    #     angle_with_wall = np.arcsin(short_distance_to_wall/distance_to_wall)
+    #     #error measurements indicated that at an angle of 40 degrees from point to walls
+    #     #measurements become unreliable. Used 180 - 90 - 40 = 50 degrees:
+    #     if(angle_with_wall < 50):
+    #         return False
+    #     else:
+    #         return True
+
     def normalize(self):
         sum = 0.0;
         for particle in self.particles:
@@ -121,14 +146,14 @@ class Particles:
     def left(self, deg):
         for i in range(len(self.particles)):
             x,y,theta,weight = self.particles[i]
-            g = random.gauss(0,0.2)
+            g = random.gauss(0,1.2)
             self.particles[i] = (x, y, theta + deg + g, weight)
 
     def forwards(self, cm):
         #update particle position after moving cm distance
         for i in range(len(self.particles)):
                 x,y,theta,weight = self.particles[i]
-                e = random.gauss(0,1.6)
+                e = random.gauss(0,9.6)
                 f = random.gauss(0,1.6)
 
                 self.particles[i] = ((x + (cm + e)*np.cos(np.deg2rad(theta))), (y + (cm + e)*np.sin(np.deg2rad(theta))), (theta + f), weight)

@@ -44,9 +44,9 @@ def move(x, y):
     current_location = particles.mean()
 
     #m = robot.get_sonar()
-
-    particles.update_weights()
-    particles.normalize()
-    particles.resample()
+    if particles.check_measurement_is_safe():
+        particles.update_weights()
+        particles.normalize()
+        particles.resample()
 
     print current_location
