@@ -143,6 +143,25 @@ def resample(particles, N):
 
 
 
+
+def resample(particles, N):
+    """
+    Resample N new particles with weight 1/N with distribution
+    determined by weight of particles
+    """
+    samples = []
+    for i in xrange(N):
+        r = random.random()
+        sum = 0
+        for j in xrange(len(particles)):
+            weight, x, y, theta = particles[i]
+            sum += weight
+            if (sum > r):
+                samples[i] = (1/N, x, y, theta)
+    for i in xrange(len(samples)):
+        particles[i] = samples[i]
+                
+
 # t = 0;
 # while True:
 #     particles.update();
