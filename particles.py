@@ -11,6 +11,7 @@ walls = [(0,0,0,10), (0,10,10,10), (10,10,10,0), (10,0,0,0)]
 class Particles:
     def __init__(self, initial_location = (1,1,0), N=100):
         self.particles = []
+        self.sigma = 1
 
         for i in xrange(0, N):
             self.particles.append((initial_location[0], initial_location[1], initial_location[2], 1.0/float(N)))
@@ -78,15 +79,15 @@ class Particles:
 
     def update_weights(self,walls,measurement):
         for i in xrange(len(self.particles)):
-            difference = self.g;(particle, walls) - measurement
-            likelihood = np.exp(-((difference)**2)/(2*sigma*sigma))
+            difference = self.get_distance_to_closest_wall(self.particles[i], walls) - measurement
+            likelihood = np.exp(-((difference)**2)/(2*self.sigma*self.sigma))
             x, y, theta, weight = self.particles[i]
             self.particles[i] = (x, y, theta, weight*likelihood)
 
     def normalize(self):
         sum = 0;
         for particle in self.particles:
-            sum += particle[0]
+            sum += particle[3]
         for i in xrange(len(self.particles)):
             x, y, theta, weight = self.particles[i]
             self.particles[i] = (x, y, theta, weight / sum)
@@ -102,10 +103,10 @@ class Particles:
             r = random.random()
             sum = 0
             for j in xrange(len(self.particles)):
-                x, y, theta, weight = self.particles[i]
+                x, y, theta, weight = self.particles[j]
                 sum += weight
                 if (sum > r):
-                    samples[i] = (x, y, theta, 1.0/float(particles_count))
+                    samples.append((x, y, theta, 1.0/float(particles_count)))
         for i in xrange(particles_count):
             self.particles[i] = samples[i]
 
@@ -126,7 +127,8 @@ class Particles:
 
 """
     TESTING
-
+"""
+"""
 test = Particles()
 # print test.temp((0,0,45,0),(-10,10,10,10))
 
@@ -134,6 +136,22 @@ test.particles[0] = (5,5,0,0.01)
 
 print test.get_distance_to_closest_wall(test.particles[0], walls)
 test.left(45)
+test.update_weights(walls, 7.07106)
+print "UPDATED"
+print test.particles
+test.normalize()
+print "NORMALIZED"
+print test.particles
+
+sum = 0
+for particle in test.particles:
+  sum += particle[3]
+print "sum: ", sum
+
+test.resample()
+print "RESAMPLED"
+print test.particles
+
 print test.particles
 print test.get_distance_to_closest_wall(test.particles[0], walls)
 test.forwards(2)
