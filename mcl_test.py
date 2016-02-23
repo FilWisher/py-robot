@@ -22,11 +22,13 @@ def drawWalls():
     
 def moveParticles(cm):
   particles.forwards(cm)
-  print "drawParticles:" + str(particles.particles)
+  saveParticles()
+  print "drawParticles:" + str(particleHistory)
 
 def turnParticles(deg):
   particles.left(deg)
-  print "drawParticles:" + str(particles.particles)
+  saveParticles()
+  print "drawParticles:" + str(particleHistory)
   
 """
 #function to move particles straight
@@ -72,11 +74,11 @@ def drawSquare(cm):
             robot.left(90)
             rotateParticles(90)
 
+"""
 def saveParticles():
-    for p in particles:
+    for p in particles.particles:
         particleHistory.append(p)
 
-"""
 drawWalls()
 for i in range(4):
   particles.forwards(50)
