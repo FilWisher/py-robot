@@ -10,11 +10,17 @@ walls = [(0,0,0,10), (0,10,10,10), (10,10,10,0), (10,0,0,0)]
 
 class Particles:
     def __init__(self, initial_location = (1,1,0), N=100):
-        self.particles = []
+        self.particles    = []
+        self.weights      = []
+        self.safe_to_update = []
+        self.nearest_wall = []
         self.sigma = 1
 
         for i in xrange(0, N):
-            self.particles.append((initial_location[0], initial_location[1], initial_location[2], 1.0/float(N)))
+            self.particles.append((initial_location[0], initial_location[1], initial_location[2]))
+            self.weights.append(1.0/float(N))
+            self.safe_to_update.append(True)
+            self.nearest_wall.append(-1)
 
     def mean(self):
         xSum = 0
@@ -22,7 +28,7 @@ class Particles:
         thetaSum = 0
         numberOfTuples = len(self.particles)
         for particle in self.particles:
-            x, y, theta, weight = particle
+            x, y, theta = particle
             xSum += x
             ySum += y
             thetaSum += theta
@@ -40,11 +46,11 @@ class Particles:
                     minimum_distance = distance_from_wall
 
         return minimum_distance
-
-    # #FIX THIS - NEED TO FIX TUPLE OF MEAN PARTICLES AND GET RELEVANT WALL TO PASS TO THIS function
+    #
+    # # #FIX THIS - NEED TO FIX TUPLE OF MEAN PARTICLES AND GET RELEVANT WALL TO PASS TO THIS function
     # def calculate_shortest_distance_from_wall(self,particle,wall):
     #     # Used https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line
-    #     x0, y0, theta = particle
+    #     x0, y0, theta,weight = particle
     #     theta_rad = np.deg2rad(theta)
     #     x1, y1, x2, y2 = walls[0]
     #     numerator = np.abs( (y2 - y1)*x0 - (x2 - x1)*y0 + x2*y1 - y2*x1 )
@@ -53,10 +59,21 @@ class Particles:
     #         print 'Warning! Found wall of zero length!'
     #         return -1
     #     return numerator/denominator
-
+    #
+    # def check_measurement_is_safe(self,walls):
+    #     mean_particle = self.mean()
+    #     short_distance_to_wall = self.calculate_shortest_distance_from_wall(mean_particle, walls)
+    #     distance_to_wall = self.calculate_distance_from_wall(mean_particle, walls)
+    #     angle_with_wall = np.arcsin(short_distance_to_wall/distance_to_wall)
+    #     #error measurements indicated that at an angle of 40 degrees from point to walls
+    #     #measurements become unreliable. Used 180 - 90 - 40 = 50 degrees:
+    #     if(angle_with_wall < 50):
+    #         return False
+    #     else:
+    #         return True
 
     def calculate_distance_from_wall(self,particle, wall):
-        x, y, theta, weight = particle
+        x, y, theta = particle
         theta_rad = np.deg2rad(theta)
         a_x, a_y, b_x, b_y = wall
         numerator = (b_y - a_y)*(a_x - x) - (b_x - a_x)*(a_y - y)
@@ -81,7 +98,7 @@ class Particles:
         """
         if(m < 0):
             return False
-        x, y, theta, weight = particle
+        x, y, theta = particle
         a_x, a_y, b_x, b_y = wall
         x_intersection = x + m*(np.cos(np.deg2rad(theta)))
         y_intersection = x + m*(np.sin(np.deg2rad(theta)))
@@ -94,69 +111,56 @@ class Particles:
         for i in xrange(len(self.particles)):
             difference = self.get_distance_to_closest_wall(self.particles[i], walls) - measurement
             likelihood = np.exp(-((difference)**2)/(2*self.sigma*self.sigma))
-            x, y, theta, weight = self.particles[i]
-            self.particles[i] = (x, y, theta, weight*likelihood)
+            self.weights[i] = self.weights[i]*likelihood
 
-    # def check_measurement_is_safe(self,walls):
-    #     mean_particle = self.mean()
-    #     short_distance_to_wall = self.calculate_shortest_distance_from_wall(mean_particle, walls)
-    #     distance_to_wall = self.calculate_distance_from_wall(mean_particle, walls)
-    #     angle_with_wall = np.arcsin(short_distance_to_wall/distance_to_wall)
-    #     #error measurements indicated that at an angle of 40 degrees from point to walls
-    #     #measurements become unreliable. Used 180 - 90 - 40 = 50 degrees:
-    #     if(angle_with_wall < 50):
-    #         return False
-    #     else:
-    #         return True
 
     def normalize(self):
         sum = 0.0;
-        for particle in self.particles:
-            sum += particle[3]
+        for weight in self.weights:
+            sum += weight
         if(sum != 0):
             for i in xrange(len(self.particles)):
-                x, y, theta, weight = self.particles[i]
-                print type(weight), type(sum)
-                self.particles[i] = (x, y, theta, weight / sum)
+                self.weights[i] = self.weights[i]/sum
         else:
-            print "you've really fucked up here"
+            print "Warning! Particle weights got really small!"
             for i in xrange(len(self.particles)):
-                x, y, theta, weight = self.particles[i]
-                self.particles[i] = (x, y, theta, 1.0 / float(len(self.particles)) )
+                self.weights[i] = 1.0/float(len(self.particles))
 
     def resample(self):
         """
         Resample N new particles with weight 1/N with distribution
         determined by weight of particles
         """
-        samples = []
+        new_particles = []
         particles_count = len(self.particles)
         for i in xrange(particles_count):
             r = random.random()
             sum = 0
-            for particle in self.particles:
-                x, y, theta, weight = particle
-                sum += weight
+            for i in xrange(len(self.weights)):
+                sum += self.weights[i]
                 if (sum >= r):
-                    samples.append((x, y, theta, 1.0/float(particles_count)))
+                    new_particles.append(self.particles[i])
                     break
+
         for i in xrange(0,particles_count):
-            self.particles[i] = samples[i]
+            self.weights[i] = 1.0/float(particles_count)
+
+        self.particles = new_particles
 
     def left(self, deg):
         for i in range(len(self.particles)):
-            x,y,theta,weight = self.particles[i]
+            x,y,theta = self.particles[i]
             g = random.gauss(0,1.2)
-            self.particles[i] = (x, y, theta + deg + g, weight)
+            self.particles[i] = (x, y, theta + deg + g)
 
     def forwards(self, cm):
         #update particle position after moving cm distance
         for i in range(len(self.particles)):
-                x,y,theta,weight = self.particles[i]
+                x,y,theta = self.particles[i]
                 e = random.gauss(0,9.6)
                 f = random.gauss(0,1.6)
 
-                self.particles[i] = ((x + (cm + e)*np.cos(np.deg2rad(theta))), (y + (cm + e)*np.sin(np.deg2rad(theta))), (theta + f), weight)
+                self.particles[i] = ((x + (cm + e)*np.cos(np.deg2rad(theta))), (y + (cm + e)*np.sin(np.deg2rad(theta))), (theta + f))
 
 """
     TESTING

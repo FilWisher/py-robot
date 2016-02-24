@@ -4,7 +4,7 @@ import time
 import robot
 import particles as p
 
-particles = p.Particles((10,10,0), 100)
+particles = p.Particles((100,100,45), 100)
 c = 0
 sigmaX = sigmaY = 1.6
 sigmaT = 0.2
@@ -13,7 +13,7 @@ numberOfParticles = 100
 
 #initialise particles
 particleHistory = []
-walls = [(0,0,0,1000),(0,1000,1000,1000),(1000,1000,1000,0),(1000,0,0,0)]
+walls = [(200,0,200,1000)]
 print "drawParticles:" + str(particles.particles)
 
 def drawWalls():
@@ -78,29 +78,20 @@ def drawSquare(cm):
 def saveParticles():
     for p in particles.particles:
         particleHistory.append(p)
+
+
+def moveAndMeasure(walls, measurement, distance):
+    moveParticles(distance)
+    particles.update_weights(walls, measurement)
+    particles.normalize()
+    particles.resample()
+
+def turnAndMeasure(walls,measurement,angle):
+    turnParticles(angle)
+    particles.update_weights(walls, measurement)
+    particles.normalize()
+    particles.resample()
+
 norm = True
 drawWalls()
-moveParticles(500)
-if norm is True:
-    particles.update_weights(walls, 48)
-    particles.normalize()
-    particles.resample()
-turnParticles(90)
-moveParticles(500)
-if norm is True:
-    particles.update_weights(walls, 48)
-    particles.normalize()
-    particles.resample()
-turnParticles(90)
-moveParticles(500)
-if norm is True:
-    particles.update_weights(walls, 48)
-    particles.normalize()
-    particles.resample()
-turnParticles(90)
-moveParticles(500)
-if norm is True:
-    particles.update_weights(walls, 48)
-    particles.normalize()
-    particles.resample()
-turnParticles(90)
+moveAndMeasure(walls,50,50)
