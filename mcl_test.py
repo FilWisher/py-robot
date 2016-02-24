@@ -4,7 +4,7 @@ import time
 import robot
 import particles as p
 
-particles = p.Particles((100,100,45), 100)
+particles = p.Particles((0,100,0), 100)
 c = 0
 sigmaX = sigmaY = 1.6
 sigmaT = 0.2
@@ -13,7 +13,7 @@ numberOfParticles = 100
 
 #initialise particles
 particleHistory = []
-walls = [(200,0,200,1000)]
+walls = [(1000,0,1000,1000)]
 print "drawParticles:" + str(particles.particles)
 
 def drawWalls():
@@ -23,10 +23,12 @@ def drawWalls():
 def moveParticles(cm):
     particles.forwards(cm)
     saveParticles()
-    print "drawParticles:" + str(particleHistory)
 
 def turnParticles(deg):
     particles.left(deg)
+    saveParticles()
+
+def printParticles():
     saveParticles()
     print "drawParticles:" + str(particleHistory)
 
@@ -80,18 +82,13 @@ def saveParticles():
         particleHistory.append(p)
 
 
-def moveAndMeasure(walls, measurement, distance):
-    moveParticles(distance)
-    particles.update_weights(walls, measurement)
-    particles.normalize()
-    particles.resample()
 
-def turnAndMeasure(walls,measurement,angle):
-    turnParticles(angle)
-    particles.update_weights(walls, measurement)
-    particles.normalize()
-    particles.resample()
 
 norm = True
 drawWalls()
-moveAndMeasure(walls,50,50)
+print "drawParticles:" + str(particles.particles)
+particles.forwards(300)
+particles.forwards(300)
+print "drawParticles:" + str(particles.particles)
+particles.do_mcl(walls,400)
+print "drawParticles:" + str(particles.particles)

@@ -134,14 +134,19 @@ class Particles:
 
 
     def update_weights(self,walls,measurement):
+        for i in xrange(len(self.particles)):
+            difference = self.distance_to_nearest_wall[i] - measurement
+            likelihood = np.exp(-((difference)**2)/(2*self.sigma*self.sigma))
+            self.weights[i] = self.weights[i]*likelihood
+
+    def do_mcl(self,walls,measurement):
         #for each particle, finds the nearest wall and the distance to it.
         self.update_nearest_walls(walls)
         #determine if it is safe to update
         if self.update_is_safe(walls):
-            for i in xrange(len(self.particles)):
-                difference = self.distance_to_nearest_wall[i] - measurement
-                likelihood = np.exp(-((difference)**2)/(2*self.sigma*self.sigma))
-                self.weights[i] = self.weights[i]*likelihood
+            self.update_weights(walls, measurement)
+            self.normalize()
+            self.resample()
 
 
     def normalize(self):
