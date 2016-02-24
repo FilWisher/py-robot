@@ -14,6 +14,7 @@ class Particles:
         self.weights      = []
         self.safe_to_update = []
         self.nearest_wall = []
+        self.distance_to_nearest_wall = []
         self.sigma = 1
 
         for i in xrange(0, N):
@@ -35,42 +36,51 @@ class Particles:
 
         return (xSum/numberOfTuples, ySum/numberOfTuples, thetaSum/numberOfTuples)
 
-    def get_distance_to_closest_wall(self, particle, walls):
-        minimum_distance = sys.maxint
+    def update_nearest_walls(self,walls):
+        self.nearest_wall = []
+        for i in xrange(len(self.particles)):
+            wall_index, distance = self.get_distance_to_nearest_wall(self.particles[i], walls)
+            self.nearest_wall.append(wall_index)
+            self.distance_to_nearest_wall.append(distance)
 
-        for wall in walls:
-            distance_from_wall = self.calculate_distance_from_wall(particle, wall)
-            if (self.check_particle_faces_wall(particle, wall, distance_from_wall)):
+    def get_distance_to_nearest_wall(self, particle, walls):
+        nearest_wall_distance = sys.maxint
+        nearest_wall_index = -1
+        for i in xrange(len(walls)):
+            distance_from_wall = self.calculate_distance_from_wall(particle, walls[i])
+            if (self.check_particle_faces_wall(particle, walls[i], distance_from_wall)):
                 # If we find a smaller distance set it
-                if(minimum_distance > distance_from_wall):
-                    minimum_distance = distance_from_wall
+                if(nearest_wall_distance > distance_from_wall):
+                    nearest_wall_distance = distance_from_wall
+                    nearest_wall_index = i
 
-        return minimum_distance
-    #
-    # # #FIX THIS - NEED TO FIX TUPLE OF MEAN PARTICLES AND GET RELEVANT WALL TO PASS TO THIS function
-    # def calculate_shortest_distance_from_wall(self,particle,wall):
-    #     # Used https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line
-    #     x0, y0, theta,weight = particle
-    #     theta_rad = np.deg2rad(theta)
-    #     x1, y1, x2, y2 = walls[0]
-    #     numerator = np.abs( (y2 - y1)*x0 - (x2 - x1)*y0 + x2*y1 - y2*x1 )
-    #     denominator = np.sqrt((y2-y1)**2 + (x2 - x1)**2)
-    #     if denominator == 0:
-    #         print 'Warning! Found wall of zero length!'
-    #         return -1
-    #     return numerator/denominator
-    #
-    # def check_measurement_is_safe(self,walls):
-    #     mean_particle = self.mean()
-    #     short_distance_to_wall = self.calculate_shortest_distance_from_wall(mean_particle, walls)
-    #     distance_to_wall = self.calculate_distance_from_wall(mean_particle, walls)
-    #     angle_with_wall = np.arcsin(short_distance_to_wall/distance_to_wall)
-    #     #error measurements indicated that at an angle of 40 degrees from point to walls
-    #     #measurements become unreliable. Used 180 - 90 - 40 = 50 degrees:
-    #     if(angle_with_wall < 50):
-    #         return False
-    #     else:
-    #         return True
+        return ( nearest_wall_index, nearest_wall_distance )
+
+
+    def calculate_shortest_distance_from_wall(self,particle,wall):
+        # Used https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line
+        x0, y0, theta = particle
+        theta_rad = np.deg2rad(theta)
+        x1, y1, x2, y2 = wall
+        numerator = np.abs( (y2 - y1)*x0 - (x2 - x1)*y0 + x2*y1 - y2*x1 )
+        denominator = np.sqrt((y2-y1)**2 + (x2 - x1)**2)
+        if denominator == 0:
+            print 'Warning! Found wall of zero length!'
+            return -1
+        return numerator/denominator
+
+    def check_measurement_is_safe(self,particle_index,walls):
+        nearest_wall_index = self.nearest_wall[particle_index]
+        distance_to_wall = nearest_wall = self.distance_to_nearest_wall[particle_index]
+        short_distance_to_wall = self.calculate_shortest_distance_from_wall(self.particles[particle_index], walls[nearest_wall_index])
+        angle_with_wall = np.arccos(short_distance_to_wall/distance_to_wall)
+        #error measurements indicated that at an angle of 40 degrees from point to walls
+        #measurements become unreliable. Used 180 - 90 - 40 = 50 degrees:
+        print np.rad2deg(angle_with_wall)
+        if(np.rad2deg(angle_with_wall) > 40):
+            return False
+        else:
+            return True
 
     def calculate_distance_from_wall(self,particle, wall):
         x, y, theta = particle
@@ -107,11 +117,31 @@ class Particles:
         else:
             return False
 
-    def update_weights(self,walls,measurement):
+    def update_is_safe(self, walls):
+        self.safe_to_update = []
+        trues = 0
         for i in xrange(len(self.particles)):
-            difference = self.get_distance_to_closest_wall(self.particles[i], walls) - measurement
-            likelihood = np.exp(-((difference)**2)/(2*self.sigma*self.sigma))
-            self.weights[i] = self.weights[i]*likelihood
+            self.safe_to_update.append( self.check_measurement_is_safe(i, walls) )
+        for i in xrange(len(self.safe_to_update)):
+            if self.safe_to_update[i]:
+                trues += 1
+        if trues > len(self.particles)/2:
+            print 'ITS SAFE'
+            return True
+        else:
+            print 'NOT SAFE'
+            return False
+
+
+    def update_weights(self,walls,measurement):
+        #for each particle, finds the nearest wall and the distance to it.
+        self.update_nearest_walls(walls)
+        #determine if it is safe to update
+        if self.update_is_safe(walls):
+            for i in xrange(len(self.particles)):
+                difference = self.distance_to_nearest_wall[i] - measurement
+                likelihood = np.exp(-((difference)**2)/(2*self.sigma*self.sigma))
+                self.weights[i] = self.weights[i]*likelihood
 
 
     def normalize(self):
@@ -171,7 +201,7 @@ test = Particles()
 
 test.particles[0] = (5,5,0,0.01)
 
-print test.get_distance_to_closest_wall(test.particles[0], walls)
+print test.get_distance_to_nearest_wall(test.particles[0], walls)
 test.left(45)
 test.update_weights(walls, 7.07106)
 print "UPDATED"
@@ -190,8 +220,8 @@ print "RESAMPLED"
 print test.particles
 
 print test.particles
-print test.get_distance_to_closest_wall(test.particles[0], walls)
+print test.get_distance_to_nearest_wall(test.particles[0], walls)
 test.forwards(2)
 print test.particles
-print test.get_distance_to_closest_wall(test.particles[0], walls)
+print test.get_distance_to_nearest_wall(test.particles[0], walls)
 """
