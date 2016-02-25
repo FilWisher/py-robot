@@ -3,10 +3,10 @@ import time
 
 port = 0 # port which ultrasoic sensor is plugged in to
 
-robot.interface.sensorEnable(port, robot.brickpi.SensorType.SENSOR_ULTRASONIC);
+robot.interface.sensorEnable(port, robot.brickpi.SensorType.SENSOR_ULTRASONIC)
 
 while True:
-	usReading = interface.getSensorValue(port)
+	usReading = robot.interface.getSensorValue(port)
 
 	if usReading :
 		print usReading

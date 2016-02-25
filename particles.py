@@ -38,6 +38,7 @@ class Particles:
 
     def update_nearest_walls(self,walls):
         self.nearest_wall = []
+	self.distance_to_nearest_wall = []
         for i in xrange(len(self.particles)):
             wall_index, distance = self.get_distance_to_nearest_wall(self.particles[i], walls)
             self.nearest_wall.append(wall_index)
@@ -48,7 +49,8 @@ class Particles:
         nearest_wall_index = -1
         for i in xrange(len(walls)):
             distance_from_wall = self.calculate_distance_from_wall(particle, walls[i])
-            if (self.check_particle_faces_wall(particle, walls[i], distance_from_wall)):
+            #check if the particle faces the wall
+	    if (self.check_particle_faces_wall(particle, walls[i], distance_from_wall)):
                 # If we find a smaller distance set it
                 if(nearest_wall_distance > distance_from_wall):
                     nearest_wall_distance = distance_from_wall
@@ -71,12 +73,13 @@ class Particles:
 
     def check_measurement_is_safe(self,particle_index,walls):
         nearest_wall_index = self.nearest_wall[particle_index]
-        distance_to_wall = nearest_wall = self.distance_to_nearest_wall[particle_index]
+	if nearest_wall_index == -1:
+		return False
+        distance_to_wall = self.distance_to_nearest_wall[particle_index]
         short_distance_to_wall = self.calculate_shortest_distance_from_wall(self.particles[particle_index], walls[nearest_wall_index])
         angle_with_wall = np.arccos(short_distance_to_wall/distance_to_wall)
         #error measurements indicated that at an angle of 40 degrees from point to walls
         #measurements become unreliable. Used 180 - 90 - 40 = 50 degrees:
-        print np.rad2deg(angle_with_wall)
         if(np.rad2deg(angle_with_wall) > 40):
             return False
         else:
@@ -121,15 +124,15 @@ class Particles:
         self.safe_to_update = []
         trues = 0
         for i in xrange(len(self.particles)):
-            self.safe_to_update.append( self.check_measurement_is_safe(i, walls) )
+            self.safe_to_update.append(self.check_measurement_is_safe(i, walls))
         for i in xrange(len(self.safe_to_update)):
             if self.safe_to_update[i]:
                 trues += 1
         if trues > len(self.particles)/2:
-            print 'ITS SAFE'
+            # print 'ITS SAFE: ', trues, '%'
             return True
         else:
-            print 'NOT SAFE'
+            print 'NOT SAFE', trues, '%'
             return False
 
 

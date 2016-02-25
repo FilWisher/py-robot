@@ -28,14 +28,18 @@ distance_correction = 0.362
 angle_correction = 0.05
 motor_smoothing = 1.0
 
+# Ultrasonic sensor
+port = 0 # port which ultrasoic sensor is plugged in to
+interface.sensorEnable(port, brickpi.SensorType.SENSOR_ULTRASONIC)
+
 # go forwards
 def forwards(cm):
     angle = cm * distance_correction
-    move(angle*1.001,angle)
+    move(angle*0.9999,angle)
 
 def backwards(cm):
     angle = cm * distance_correction
-    move(-angle*1.001,-angle)
+    move(-angle,-angle)
 
 def left(degree):
     angle = degree * angle_correction
@@ -58,7 +62,7 @@ def move(delta_a1,delta_a2):
     target_a1 = initial_a1 + delta_a1
     target_a2 = initial_a2 + delta_a2
     interface.increaseMotorAngleReferences(motors, [delta_a1, delta_a2])
-    
+
     dif1t1 = 0
     dif2t1 = 0
     while(True):
@@ -69,9 +73,9 @@ def move(delta_a1,delta_a2):
         """
         dif1t2 = (target_a1-a1)
         dif2t2 = (target_a2-a2)
-	print dif1t1, dif2t1
-        print dif1t2, dif2t2
-	print
+	#print dif1t1, dif2t1
+        #print dif1t2, dif2t2
+	#print
         #if(abs(dif1) + abs(dif2) < 0.25):
         if( dif1t1 == dif1t2 and dif2t1 == dif2t2):
             break
@@ -79,9 +83,14 @@ def move(delta_a1,delta_a2):
         dif1t1 = (target_a1-a1)
         dif2t1 = (target_a2-a2)
 
+def getSensorMeasurement():
+	usReading = interface.getSensorValue(port)
+	time.sleep(0.1)
+    # 18 is distance of sensor from center of rotation
+	return usReading[0] + 18
 
 def square(cm):
-    
+
     forwards(cm)
     right(90)
     forwards(cm)
