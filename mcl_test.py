@@ -40,10 +40,10 @@ def calculate_movement(current, destination):
     return d, d_theta
 
 def move_in_steps(current_loc,destination,step_size=10):
-    
+
     def vector_length(x,y):
         return np.sqrt(x**2 + y**2)
-    
+
     x0, y0, theta0 = current_loc
     x1, y1 = destination
 
@@ -56,7 +56,7 @@ def move_in_steps(current_loc,destination,step_size=10):
     dy /= norm
 
     while True:
-	print "drawParticles:" + str(particles.particles)	
+        print "drawParticles:" + str(particles.particles)
         new_x = x0 + dx*step_size
         new_y = y0 + dy*step_size
         if( vector_length(new_x,new_y) < vector_length(x1,y1)  ):
@@ -68,8 +68,8 @@ def move_in_steps(current_loc,destination,step_size=10):
 
 def move(current_loc, destination):
     distance, angle = calculate_movement(current_loc, destination)
-    robot.left(angle)
-    robot.forwards(distance)
+    # robot.left(angle)
+    # robot.forwards(distance)
     particles.left(angle)
     particles.forwards(distance)
 
