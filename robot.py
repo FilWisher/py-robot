@@ -89,6 +89,8 @@ def getSensorMeasurement():
     # 18 is distance of sensor from center of rotation
 	return usReading[0] + 18
 
+
+#function to draw a square
 def square(cm):
 
     forwards(cm)

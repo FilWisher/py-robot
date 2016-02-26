@@ -4,6 +4,7 @@ import time
 import robot
 import particles as p
 
+#helper functions
 def drawWalls():
     for wall in walls:
         print "drawLine:" + str(wall)
@@ -24,6 +25,10 @@ def saveParticles():
     for p in particles.particles:
         particleHistory.append(p)
 
+def vector_length(x,y):
+     return np.sqrt(x**2 + y**2)
+
+#function which uses the code from our waypoint navigation function path_planning
 def calculate_movement(current, destination):
     current_x, current_y, current_theta = current
     x, y = destination
@@ -39,10 +44,8 @@ def calculate_movement(current, destination):
 
     return d, d_theta
 
-def move_in_steps(current_loc,destination,step_size=10):
-
-    def vector_length(x,y):
-        return np.sqrt(x**2 + y**2)
+#function which moves the robot in steps
+def move_in_steps(current_loc,destination,step_size=20):
 
     x0, y0, theta0 = current_loc
     x1, y1 = destination
@@ -66,6 +69,7 @@ def move_in_steps(current_loc,destination,step_size=10):
         else:
             return move((x0,y0,theta0), destination)
 
+#function which moves the robot from current_loc to destination using waypoint navigation
 def move(current_loc, destination):
     distance, angle = calculate_movement(current_loc, destination)
     # robot.left(angle)
@@ -73,39 +77,69 @@ def move(current_loc, destination):
     particles.left(angle)
     particles.forwards(distance)
 
-    measurement = robot.getSensorMeasurement()
-    print "measurement: ", measurement
-    particles.do_mcl(walls, measurement)
-    print "mean: ", particles.mean(), " wanted: ", destination
+    #if using mcl, get the measurement and use the mcl algorithm
+    #measurement = robot.getSensorMeasurement()
+    #print "measurement: ", measurement
+    #particles.do_mcl(walls, measurement)
+    #print "mean: ", particles.mean(), " wanted: ", destination
 
-    return particles.mean()
+    #return the new mean of the particles if using mcl
+    #return particles.mean()
 
+    #otherwise, return the destination, if not using mcl correction
+    return destination
 
+#function which makes the robot go to a number of waypoints
 def journey(waypoints):
+    #save the mean of the particle cloud in current location
     current = particles.mean()
     for waypoint in waypoints:
+        #move the robot to waypoint in steps.
+        #Note that if using mcl, move_in_steps will return the new particle mean calculated after mcl.
+        #If not using mcl, current will simply be the waypoint, as we assume we arrived at waypoint,
         old = current
-        current = move_in_steps(current, waypoint)
-        print "drawLine:" + str((old[0], old[1], current[0], current[1]))
+        current = move_in_steps(old, waypoint)
+        #print "drawLine:" + str((old[0], old[1], current[0], current[1]))
 
     # TODO: draw line from old loc to current each time
     # TODO: keep track of history of particles
 
-        #def update_position(current_loc, new_loc):
-    #move the robot from location it got to to the corrected position after sonar measurement
-    #distance, angle = calculate_movement(current_loc, new_loc)
-    #robot.left(angle)
-    #robot.forwards(distance)
 
+#function which makes the robot adjust its position using mcl. It returns true only if within 10 cm of waypoint
+def update_position(current_loc, waypoint):
+    #move the robot from location it got to to the corrected position after sonar measurement
+    distance, angle = calculate_movement(current_loc, waypoint)
+    robot.left(angle)
+    robot.forwards(distance)
+
+    #get the new particle mean
+    mean = particles.mean()
+
+    #check if close enough to waypoint
+
+    x_mean, y_mean, alpha_mean = mean
+    x_way, y_way = way
+    dx = x_mean - x_way
+    dy = y_mean - y_way
+    diff = vector_length(dx,dy)
+    
+    if diff <= 10:
+        return True
+    else:
+        return False
+
+
+
+#initialise particles
 particles = p.Particles((84,30,0), 100)
 
 numberOfParticles = 100
 
-#initialise particles
 particleHistory = []
+
 # ASSESSMENT STUFF
-walls = [(0,0,0,168), (0,168,84,168), (84,126,84,210), (84,210,168,210), (168,210,168,84), (168,84,210,84), (210,84,210,0)]
-waypoints = [(180, 30), (180, 54), (138, 54), (138, 168), (114, 168), (114, 84), (84, 84), (84, 30)]
+#walls = [(0,0,0,168), (0,168,84,168), (84,126,84,210), (84,210,168,210), (168,210,168,84), (168,84,210,84), (210,84,210,0)]
+#waypoints = [(180, 30), (180, 54), (138, 54), (138, 168), (114, 168), (114, 84), (84, 84), (84, 30)]
 
 # TEST WORLD
 #walls = [(130,50,130,-50)]
