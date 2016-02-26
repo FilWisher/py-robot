@@ -1,7 +1,7 @@
 import random
 import numpy as np
 import time
-import robot
+#import robot
 import particles as p
 
 #helper functions
@@ -99,8 +99,9 @@ def journey(waypoints, walls):
         old = current
         current = move_in_steps(old, waypoint)
 
-        print: "according to measurements, we are currently at location:"
+        print "according to measurements, we are currently at location:"
         print current
+	print "got to waypoint: ", waypoint
 
         #print "drawLine:" + str((old[0], old[1], current[0], current[1]))
 
@@ -127,8 +128,8 @@ def journey(waypoints, walls):
 def update_position(current_loc, waypoint):
     #move the robot from location it got to to the corrected position after sonar measurement
     distance, angle = calculate_movement(current_loc, waypoint)
-    robot.left(angle)
-    robot.forwards(distance)
+    #robot.left(angle)
+    #robot.forwards(distance)
 
     #get the new particle mean
     mean = particles.mean()
@@ -150,28 +151,28 @@ def update_position(current_loc, waypoint):
 #function that turns left and right to find a wall and adjust its position if it finds one
 def optimize_position(current_loc,waypoint,particles,walls):
 
+    print "hello"
     #first turn left and try to find a wall
-    robot.left(90)
+    #robot.left(90)
     #get a measurement
-    measurement = robot.getSensorMeasurement()
+    #measurement = robot.getSensorMeasurement()
     #do mcl
-    particles.do_mcl(walls,measurement)
+    #particles.do_mcl(walls,measurement)
     
     #turn right
-    robot.left(-90)
-    robot.left(-90)
+    #robot.left(-90)
+    #robot.left(-90)
     #get a measurement
-    measurement = robot.getSensorMeasurement()
+    #measurement = robot.getSensorMeasurement()
     #do mcl
-    particles.do_mcl(walls,measurement)
+    #particles.do_mcl(walls,measurement)
     
     #turn back to centre
-    robot.left(90).
+    #robot.left(90)
     #get anoher measurement
-    measurement = robot.getSensorMeasurement()
+    #measurement = robot.getSensorMeasurement()
     #do mcl
-    particles.do_mcl(walls,measurement)
-        
+    #particles.do_mcl(walls,measurement)   
         
     
 
@@ -187,12 +188,13 @@ numberOfParticles = 100
 particleHistory = []
 
 # ASSESSMENT STUFF
-#walls = [(0,0,0,168), (0,168,84,168), (84,126,84,210), (84,210,168,210), (168,210,168,84), (168,84,210,84), (210,84,210,0)]
-#waypoints = [(180, 30), (180, 54), (138, 54), (138, 168), (114, 168), (114, 84), (84, 84), (84, 30)]
+walls = [(0,0,0,168), (0,168,84,168), (84,126,84,210), (84,210,168,210), (168,210,168,84), (168,84,210,84), (210,84,210,0)]
+waypoints = [(180, 30), (180, 54), (138, 54), (138, 168), (114, 168), (114, 84), (84, 84), (84, 30)]
 
 # TEST WORLD
 #walls = [(130,50,130,-50)]
 #waypoints = [(100,50)]
+print "starting Simulation"
 print "drawParticles:" + str(particles.particles)
 drawWalls()
 journey(waypoints, walls)
