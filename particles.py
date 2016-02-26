@@ -17,7 +17,7 @@ class Particles:
         self.safe_to_update = []
         self.nearest_wall = []
         self.distance_to_nearest_wall = []
-        self.sigma = 1
+        self.sigma = 1.0
 
         for i in xrange(0, N):
             self.particles.append((initial_location[0], initial_location[1], initial_location[2]))
@@ -109,11 +109,10 @@ class Particles:
         return numerator/denominator
 
     #function which checks if x is in between x1 and x2
-    def in_range(self,x, x1, x2):
-        x_min = x1 if (x1 < x2) else x2
-        x_max = x1 if (x1 > x2) else x2
-
-        if(x_min <= x <= x_max):
+    def in_range(self,x, a, b):
+        ok1 = a <= x <= b
+        ok2 = a >= x >= b
+        if(ok1 or ok2):
             return True
         else:
             return False
@@ -128,7 +127,7 @@ class Particles:
         x, y, theta = particle
         a_x, a_y, b_x, b_y = wall
         x_intersection = x + m*(np.cos(np.deg2rad(theta)))
-        y_intersection = x + m*(np.sin(np.deg2rad(theta)))
+        y_intersection = y + m*(np.sin(np.deg2rad(theta)))
         if (self.in_range(x_intersection,a_x, b_x) and self.in_range(y_intersection,a_y, b_y)):
             return True
         else:
@@ -233,6 +232,11 @@ class Particles:
                 f = random.gauss(0,0.2)
 
                 self.particles[i] = ((x + (cm + e)*np.cos(np.deg2rad(theta))), (y + (cm + e)*np.sin(np.deg2rad(theta))), (theta + f))
+
+
+    def getFakeSensorMeasurement(self,walls):
+        i, d = self.get_wall_info(self.mean(),walls)
+        return d+random.gauss(0.0,1.0)
 
 """
     TESTING
