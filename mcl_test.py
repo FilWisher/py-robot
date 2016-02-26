@@ -63,7 +63,7 @@ def move_in_steps(current_loc,destination,step_size=20):
         new_x = x0 + dx*step_size
         new_y = y0 + dy*step_size
         if( vector_length(new_x,new_y) < vector_length(x1,y1)  ):
-            move((x0,y0,theta0),(new_x,new_y))
+            particle_mean = move((x0,y0,theta0),(new_x,new_y))
             x0 = new_x
             y0 = new_y
         else:
@@ -77,20 +77,19 @@ def move(current_loc, destination):
     particles.left(angle)
     particles.forwards(distance)
 
+    print "moved at angle:" , angle, "and distance" , distance
+
     #if using mcl, get the measurement and use the mcl algorithm
     #measurement = robot.getSensorMeasurement()
     #print "measurement: ", measurement
     #particles.do_mcl(walls, measurement)
     #print "mean: ", particles.mean(), " wanted: ", destination
 
-    #return the new mean of the particles if using mcl
-    #return particles.mean()
-
-    #otherwise, return the destination, if not using mcl correction
-    return destination
+    #return the new mean of the particles if using mcl, but also if not.
+    return particles.mean()
 
 #function which makes the robot go to a number of waypoints
-def journey(waypoints):
+def journey(waypoints, walls):
     #save the mean of the particle cloud in current location
     current = particles.mean()
     for waypoint in waypoints:
@@ -99,10 +98,29 @@ def journey(waypoints):
         #If not using mcl, current will simply be the waypoint, as we assume we arrived at waypoint,
         old = current
         current = move_in_steps(old, waypoint)
+
+        print: "according to measurements, we are currently at location:"
+        print current
+
         #print "drawLine:" + str((old[0], old[1], current[0], current[1]))
 
-    # TODO: draw line from old loc to current each time
-    # TODO: keep track of history of particles
+        #update position
+        """
+        #unpack waypoint and current position
+        x_c, y_c, theta = current
+        x_d, y_d = waypoint
+
+        diff = vector_length(dx,dy)
+        if diff < 10:
+            dest_reached == True
+        
+        #update position
+        while(dest_reached == False):
+            dest_reached = update_position(current,waypoint)
+        """
+
+        #optimize position
+        # optimize_position(current_loc,waypoint,particles,walls)
 
 
 #function which makes the robot adjust its position using mcl. It returns true only if within 10 cm of waypoint
@@ -129,6 +147,37 @@ def update_position(current_loc, waypoint):
         return False
 
 
+#function that turns left and right to find a wall and adjust its position if it finds one
+def optimize_position(current_loc,waypoint,particles,walls):
+
+    #first turn left and try to find a wall
+    robot.left(90)
+    #get a measurement
+    measurement = robot.getSensorMeasurement()
+    #do mcl
+    particles.do_mcl(walls,measurement)
+    
+    #turn right
+    robot.left(-90)
+    robot.left(-90)
+    #get a measurement
+    measurement = robot.getSensorMeasurement()
+    #do mcl
+    particles.do_mcl(walls,measurement)
+    
+    #turn back to centre
+    robot.left(90).
+    #get anoher measurement
+    measurement = robot.getSensorMeasurement()
+    #do mcl
+    particles.do_mcl(walls,measurement)
+        
+        
+    
+
+
+
+
 
 #initialise particles
 particles = p.Particles((84,30,0), 100)
@@ -146,7 +195,7 @@ particleHistory = []
 #waypoints = [(100,50)]
 print "drawParticles:" + str(particles.particles)
 drawWalls()
-journey(waypoints)
+journey(waypoints, walls)
 
 # current_loc = particles.mean()
 # print "drawParticles:" + str(particles.particles)

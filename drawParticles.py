@@ -37,6 +37,7 @@ def Mean(listOfTuples):
 
     return (xSum/numberOfTuples, ySum/numberOfTuples, thetaSum/numberOfTuples)
 
+
 #function to move particles straight
 def moveParticles(cm):
         initialPosition = Mean(particles)
@@ -84,4 +85,4 @@ def saveParticles():
     for p in particles:
         particleHistory.append(p)
 
-drawSquare(40)
+#drawSquare(40)

@@ -4,8 +4,10 @@ import math
 import numpy as np
 import sys
 
-#test_wall = (10,10,10,-10)
-#walls = [(0,0,0,10), (0,10,10,10), (10,10,10,0), (10,0,0,0)]
+
+#using SIGMAX and SIGMAY = 0.9
+#using straight rotational sigma of 0.2
+#using pure rotational sigma of 0.2
 
 
 class Particles:
@@ -214,12 +216,13 @@ class Particles:
             self.resample()
 
 
-#Movement functions, should use the ones from robot.py though#
+#Movement functions for the particles
 
     def left(self, deg):
         for i in range(len(self.particles)):
             x,y,theta = self.particles[i]
             g = random.gauss(0,0.2)
+            #TODO: Check how the adding of deg and g affects mean angle, would it cause problems?
             self.particles[i] = (x, y, theta + deg + g)
 
     def forwards(self, cm):
