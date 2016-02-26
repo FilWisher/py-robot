@@ -4,29 +4,31 @@ import time
 interface=brickpi.Interface()
 interface.initialize()
 
-motors = [0,1]
+motors = [1,0]
 speed = 6.0
 
 interface.motorEnable(motors[0])
 interface.motorEnable(motors[1])
 
 motorParams = interface.MotorAngleControllerParameters()
-motorParams.maxRotationAcceleration = 6.0
-motorParams.maxRotationSpeed = 12.0
+motorParams.maxRotationAcceleration = 3.0
+motorParams.maxRotationSpeed = 6.0
 motorParams.feedForwardGain = 255/20.0
 motorParams.minPWM = 18.0
 motorParams.pidParameters.minOutput = -255
 motorParams.pidParameters.maxOutput = 255
-motorParams.pidParameters.k_p = 400.0
-motorParams.pidParameters.k_i = 0.1
-motorParams.pidParameters.k_d = 0.1
+motorParams.pidParameters.k_p = 180
+motorParams.pidParameters.k_i = 360
+motorParams.pidParameters.k_d = 30
 
 interface.setMotorAngleControllerParameters(motors[0],motorParams)
 interface.setMotorAngleControllerParameters(motors[1],motorParams)
 
-distance_correction = 0.362
-angle_correction = 0.05
-motor_smoothing = 1.0
+distance_correction = 0.546
+angle_correction = 0.0689
+
+LEFT_WHEEL = 1.0
+RIGHT_WHEEL = 0.992
 
 # Ultrasonic sensor
 port = 0 # port which ultrasoic sensor is plugged in to
@@ -35,7 +37,7 @@ interface.sensorEnable(port, brickpi.SensorType.SENSOR_ULTRASONIC)
 # go forwards
 def forwards(cm):
     angle = cm * distance_correction
-    move(angle*0.9999,angle)
+    move(angle,angle)
 
 def backwards(cm):
     angle = cm * distance_correction
@@ -56,9 +58,9 @@ def get_angles():
     return a1,a2
 
 def move(delta_a1,delta_a2):
-    #delta_a2 corresponds to the left motor
-    delta_a1 *= motor_smoothing
-    initial_a1, initial_a2 = get_angles()
+    """
+    # delta_a2 corresponds to the left motor
+    # initial_a1, initial_a2 = get_angles()
     target_a1 = initial_a1 + delta_a1
     target_a2 = initial_a2 + delta_a2
     interface.increaseMotorAngleReferences(motors, [delta_a1, delta_a2])
@@ -67,10 +69,6 @@ def move(delta_a1,delta_a2):
     dif2t1 = 0
     while(True):
         a1,a2 = get_angles()
-        """
-        dif1 = (target_a1-a1)
-        dif2 = (target_a2-a2)
-        """
         dif1t2 = (target_a1-a1)
         dif2t2 = (target_a2-a2)
 	#print dif1t1, dif2t1
@@ -82,6 +80,11 @@ def move(delta_a1,delta_a2):
         time.sleep(0.3)
         dif1t1 = (target_a1-a1)
         dif2t1 = (target_a2-a2)
+        """
+    angle1 = distance_correction * delta_a1
+    angle2 = distance_correction * delta_a2
+
+    interface.increaseMotorAngleReferences(motors, [angle1*LEFT_WHEEL, angle2*RIGHT_WHEEL])
 
 def getSensorMeasurement():
 	usReading = interface.getSensorValue(port)
