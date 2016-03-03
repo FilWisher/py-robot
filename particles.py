@@ -121,6 +121,7 @@ class Particles:
         return numerator/denominator
 
     def in_range(self,x, a, b):
+        # tolerance to avoid strange edge cases
         ds = 1e-5
         ok1 = a - ds <= x <= b + ds
         ok2 = a + ds >= x >= b - ds
@@ -234,4 +235,4 @@ class Particles:
         if(canvas != None):
             rads = np.deg2rad(angle)
             canvas.drawLine((x0,y0,x0+d*np.cos(rads),y0+d*np.sin(rads)))
-        return d+random.gauss(0.0,0.0)
+        return d#+random.gauss(0.0,0.0)

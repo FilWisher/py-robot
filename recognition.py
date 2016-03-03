@@ -82,19 +82,23 @@ class SignatureContainer():
 def characterize_location(ls):
     for i in range(len(ls.sig)):
         angle = float(i) * 360.0/float(len(ls.sig))
-        ls.sig[i] = particles.getFakeSensorMeasurement(walls,angle,canvas)
+        ls.sig[i] = int(particles.getFakeSensorMeasurement(walls,angle,canvas))
 
 
 # FILL IN: compare two signatures
 def compare_signatures(ls1, ls2):
-    dist = 0
-    print "TODO:    You should implement the function that compares two signatures."
+    #histogram returns a tuple of histogram and spacing bins -only take the histogram
+    h1 = np.histogram(ls1.sig,bins=20,range=(0,255),normed=True)[0]
+    h2 = np.histogram(ls2.sig,bins=20,range=(0,255),normed=True)[0]
+    histogram_difference = h1 - h2
+    histogram_difference = histogram_difference**2
+    dist = histogram_difference.sum()
     return dist
 
 # This function characterizes the current location, and stores the obtained
 # signature into the next available file.
 def learn_location():
-    ls = LocationSignature(60)
+    ls = LocationSignature(noSonarReadings)
     characterize_location(ls)
     idx = signatures.get_free_index();
     if (idx == -1): # run out of signature files
@@ -115,27 +119,46 @@ def learn_location():
 #      actual characterization is the smallest.
 # 4.   Display the index of the recognized location on the screen
 def recognize_location():
-    ls_obs = LocationSignature();
+    ls_obs = LocationSignature(noSonarReadings);
     characterize_location(ls_obs);
-
+    dist = []
     # FILL IN: COMPARE ls_read with ls_obs and find the best match
     for idx in range(signatures.size):
-        print "STATUS:  Comparing signature " + str(idx) + " with the observed signature."
+        # print "STATUS:  Comparing signature " + str(idx) + " with the observed signature."
         ls_read = signatures.read(idx);
-        dist    = compare_signatures(ls_obs, ls_read)
+        dist.append(compare_signatures(ls_obs, ls_read))
+
+    #find smallest distance
+    smallest_d = dist[0]
+    smallest_idx = 0
+    for i in xrange(1,len(dist)):
+        if dist[i] < smallest_d:
+            smallest_d = dist[i]
+            smallest_idx = i
+
+    return (smallest_idx,dist[smallest_idx])
 
 # Prior to starting learning the locations, it should delete files from previous
 # learning either manually or by calling signatures.delete_loc_files().
 # Then, either learn a location, until all the locations are learned, or try to
 # recognize one of them, if locations have already been learned.
-
+noSonarReadings = 5
 signatures = SignatureContainer(5)
-fakeTraining = True
-if fakeTraining:
-    # for w in waypoints:
-    #     x,y = w
-    #     print w
-    #     particles = ps.Particles((x,y,0),1)
-    #     learn_location()
-    particles = ps.Particles((84,30,0),1)
+
+signatures.delete_loc_files()
+for w in waypoints:
+    x,y = w
+    print w
+    particles = ps.Particles((x,y,0.0),1)
     learn_location()
+
+for i in xrange(5):
+    print 'loaded : ', i,
+    signatures.read(i)
+
+print ' RECOGNITION : '
+for i in xrange(5):
+    x, y = waypoints[i]
+    particles = ps.Particles((x,y,0.0),1)
+    res = recognize_location()
+    print 'expected ', i, ' got ', res[0], 'with probability ', 1.0 - res[1]
