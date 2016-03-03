@@ -227,6 +227,19 @@ class Particles:
                 f = random.gauss(0,0.1)
 
                 self.data[i] = ((x + (cm + e)*np.cos(np.deg2rad(theta))), (y + (cm + e)*np.sin(np.deg2rad(theta))), (theta + f))
-    def getFakeSensorMeasurement(self,walls):
-        i, d = self.get_distance_to_nearest_wall(self.mean(),walls)
+                
+    def getFakeSensorMeasurement(self,position,walls):
+        i, d = self.get_distance_to_nearest_wall(position,walls)
         return d+random.gauss(0.0,1.0)
+    
+    def getFakeSensorSweep(self,position,walls):
+        x, y, theta = position
+        sweep = []
+        for i in xrange(360):
+            sweep.append(getFakeSensorMeasurement((x,y,theta+float(i)),walls))
+        print sweep
+            
+            
+            
+            
+        
