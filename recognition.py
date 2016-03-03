@@ -64,7 +64,7 @@ class SignatureContainer():
     # Read signature file identified by index. If the file doesn't exist
     # it returns an empty signature.
     def read(self, index):
-        ls = LocationSignature()
+        ls = LocationSignature(noSonarReadings)
         filename = self.filenames[index]
         if os.path.isfile(filename):
             f = open(filename, 'r')
@@ -136,29 +136,55 @@ def recognize_location():
             smallest_d = dist[i]
             smallest_idx = i
 
-    return (smallest_idx,dist[smallest_idx])
+    chosen_sig = signatures.read(smallest_idx)
+    angle = estimate_angle(chosen_sig, ls_obs)
+
+    return (smallest_idx,angle)
+
+def estimate_angle(chosen,observed):
+    c = np.array(chosen.sig)
+    o = np.array(observed.sig)
+    meansq = []
+    for i in xrange(len(c)):
+        res = np.roll(c,-i) - o
+        res = res**2
+        meansq.append(res.sum())
+
+    smallest_d = meansq[0]
+    smallest_idx = 0
+    for i in xrange(1,len(meansq)):
+        if meansq[i] < smallest_d:
+            smallest_d = meansq[i]
+            smallest_idx = i
+
+    return float(smallest_idx)*360.0/float(noSonarReadings)
 
 # Prior to starting learning the locations, it should delete files from previous
 # learning either manually or by calling signatures.delete_loc_files().
 # Then, either learn a location, until all the locations are learned, or try to
 # recognize one of them, if locations have already been learned.
-noSonarReadings = 5
+noSonarReadings = 50
 signatures = SignatureContainer(5)
+learning = False
+if learning:
+    # Delete old data
+    signatures.delete_loc_files()
+    # Do learning
+    for w in waypoints:
+        x,y = w
+        print w
+        particles = ps.Particles((x,y,0.0),1)
+        learn_location()
 
-signatures.delete_loc_files()
-for w in waypoints:
-    x,y = w
-    print w
-    particles = ps.Particles((x,y,0.0),1)
-    learn_location()
 
-for i in xrange(5):
-    print 'loaded : ', i,
-    signatures.read(i)
+    # Load learned data
+    for i in xrange(5):
+        print 'loaded : ', i,
+        signatures.read(i)
 
-print ' RECOGNITION : '
+# Do recognition at each waypoint
 for i in xrange(5):
     x, y = waypoints[i]
-    particles = ps.Particles((x,y,0.0),1)
+    particles = ps.Particles((x,y,111),1)
     res = recognize_location()
-    print 'expected ', i, ' got ', res[0], 'with probability ', 1.0 - res[1]
+    print 'expected ', i, ' got ', res[0], ' got angle ', res[1]

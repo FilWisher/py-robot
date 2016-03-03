@@ -79,7 +79,6 @@ class Particles:
                 if(nearest_wall_distance > distance_from_wall):
                     nearest_wall_distance = distance_from_wall
                     nearest_wall_index = i
-
         return ( nearest_wall_index, nearest_wall_distance )
 
 
@@ -122,7 +121,7 @@ class Particles:
 
     def in_range(self,x, a, b):
         # tolerance to avoid strange edge cases
-        ds = 1e-5
+        ds = 1e-10
         ok1 = a - ds <= x <= b + ds
         ok2 = a + ds >= x >= b - ds
         if(ok1 or ok2):
@@ -233,6 +232,6 @@ class Particles:
         newPos = (x0, y0, theta0 + angle)
         i, d = self.get_distance_to_nearest_wall(newPos,walls)
         if(canvas != None):
-            rads = np.deg2rad(angle)
+            rads = np.deg2rad(theta0 + angle)
             canvas.drawLine((x0,y0,x0+d*np.cos(rads),y0+d*np.sin(rads)))
-        return d#+random.gauss(0.0,0.0)
+        return d+random.gauss(0.0,0.5)
