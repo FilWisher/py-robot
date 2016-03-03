@@ -72,7 +72,7 @@ class Particles:
         nearest_wall_distance = 2000
         nearest_wall_index = -1
         for i in xrange(len(walls)):
-            distance_from_wall = self.calculate_distance_from_wall(particle, walls[i])
+            distance_from_wall = self.distance_from_wall(particle, walls[i])
             ok = self.check_particle_faces_wall(particle, walls[i], distance_from_wall)
             if (ok):
                 # If we find a smaller distance set it
@@ -80,12 +80,10 @@ class Particles:
                     nearest_wall_distance = distance_from_wall
                     nearest_wall_index = i
 
-        # if nearest_wall_distance > sys.maxint - 40000:
-        #     print particle
         return ( nearest_wall_index, nearest_wall_distance )
 
 
-    def calculate_shortest_distance_from_wall(self,particle,wall):
+    def orthogonal_distance_from_wall(self,particle,wall):
         # Used https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line
         x0, y0, theta = particle
         theta_rad = np.deg2rad(theta)
@@ -102,7 +100,7 @@ class Particles:
         if nearest_wall_index == -1:
                 return False
         distance_to_wall = self.distance_to_nearest_wall[particle_index]
-        short_distance_to_wall = self.calculate_shortest_distance_from_wall(self.data[particle_index], walls[nearest_wall_index])
+        short_distance_to_wall = self.orthogonal_distance_from_wall(self.data[particle_index], walls[nearest_wall_index])
         angle_with_wall = np.arccos(short_distance_to_wall/distance_to_wall)
         #error measurements indicated that at an angle of 40 degrees from point to walls
         #measurements become unreliable. Used 180 - 90 - 40 = 50 degrees:
@@ -111,20 +109,21 @@ class Particles:
         else:
             return True
 
-    def calculate_distance_from_wall(self,particle, wall):
+    def distance_from_wall(self,particle, wall):
         x, y, theta = particle
         theta_rad = np.deg2rad(theta)
         a_x, a_y, b_x, b_y = wall
         numerator = (b_y - a_y)*(a_x - x) - (b_x - a_x)*(a_y - y)
         denominator = (b_y - a_y)*math.cos(theta_rad) - (b_x - a_x)*math.sin(theta_rad)
         if(denominator == 0):
-            # print 'Warning denominator was zero in calculate_distance_from_wall'
+            # print 'Warning denominator was zero in distance_from_wall'
             return -sys.maxint
         return numerator/denominator
 
     def in_range(self,x, a, b):
-        ok1 = a <= x <= b
-        ok2 = a >= x >= b
+        ds = 1e-5
+        ok1 = a - ds <= x <= b + ds
+        ok2 = a + ds >= x >= b - ds
         if(ok1 or ok2):
             return True
         else:
@@ -227,19 +226,12 @@ class Particles:
                 f = random.gauss(0,0.1)
 
                 self.data[i] = ((x + (cm + e)*np.cos(np.deg2rad(theta))), (y + (cm + e)*np.sin(np.deg2rad(theta))), (theta + f))
-                
-    def getFakeSensorMeasurement(self,position,walls):
-        i, d = self.get_distance_to_nearest_wall(position,walls)
-        return d+random.gauss(0.0,1.0)
-    
-    def getFakeSensorSweep(self,position,walls):
-        x, y, theta = position
-        sweep = []
-        for i in xrange(360):
-            sweep.append(getFakeSensorMeasurement((x,y,theta+float(i)),walls))
-        print sweep
-            
-            
-            
-            
-        
+
+    def getFakeSensorMeasurement(self,walls,angle=0.0,canvas=None):
+        x0, y0, theta0 = self.mean()
+        newPos = (x0, y0, theta0 + angle)
+        i, d = self.get_distance_to_nearest_wall(newPos,walls)
+        if(canvas != None):
+            rads = np.deg2rad(angle)
+            canvas.drawLine((x0,y0,x0+d*np.cos(rads),y0+d*np.sin(rads)))
+        return d+random.gauss(0.0,0.0)

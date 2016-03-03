@@ -4,7 +4,9 @@
 
 import random
 import os
+from canvas import *
 
+#
 # Location signature class: stores a signature characterizing one location
 class LocationSignature:
     def __init__(self, no_bins = 360):
@@ -78,9 +80,10 @@ class SignatureContainer():
 
 # FILL IN: spin robot or sonar to capture a signature and store it in ls
 def characterize_location(ls):
-    print "TODO:    You should implement the function that captures a signature."
     for i in range(len(ls.sig)):
-        ls.sig[i] = random.randint(0, 255)
+        angle = float(i) * 360.0/float(len(ls.sig))
+        ls.sig[i] = particles.getFakeSensorMeasurement(walls,angle,canvas)
+
 
 # FILL IN: compare two signatures
 def compare_signatures(ls1, ls2):
@@ -91,7 +94,7 @@ def compare_signatures(ls1, ls2):
 # This function characterizes the current location, and stores the obtained
 # signature into the next available file.
 def learn_location():
-    ls = LocationSignature()
+    ls = LocationSignature(60)
     characterize_location(ls)
     idx = signatures.get_free_index();
     if (idx == -1): # run out of signature files
@@ -126,8 +129,13 @@ def recognize_location():
 # Then, either learn a location, until all the locations are learned, or try to
 # recognize one of them, if locations have already been learned.
 
-signatures = SignatureContainer(5);
-#signatures.delete_loc_files()
-
-learn_location();
-recognize_location();
+signatures = SignatureContainer(5)
+fakeTraining = True
+if fakeTraining:
+    # for w in waypoints:
+    #     x,y = w
+    #     print w
+    #     particles = ps.Particles((x,y,0),1)
+    #     learn_location()
+    particles = ps.Particles((84,30,0),1)
+    learn_location()
