@@ -90,10 +90,7 @@ def compare_signatures(ls1, ls2):
     #histogram returns a tuple of histogram and spacing bins -only take the histogram
     h1 = np.histogram(ls1.sig,bins=20,range=(0,255),normed=True)[0]
     h2 = np.histogram(ls2.sig,bins=20,range=(0,255),normed=True)[0]
-    histogram_difference = h1 - h2
-    histogram_difference = histogram_difference**2
-    dist = histogram_difference.sum()
-    return dist
+    return mean_squared_distance(h1,h2)
 
 # This function characterizes the current location, and stores the obtained
 # signature into the next available file.
@@ -119,53 +116,57 @@ def learn_location():
 #      actual characterization is the smallest.
 # 4.   Display the index of the recognized location on the screen
 def recognize_location():
-    ls_obs = LocationSignature(noSonarReadings);
-    characterize_location(ls_obs);
+    ls_obs = LocationSignature(noSonarReadings)
+    characterize_location(ls_obs)
     dist = []
     # FILL IN: COMPARE ls_read with ls_obs and find the best match
     for idx in range(signatures.size):
         # print "STATUS:  Comparing signature " + str(idx) + " with the observed signature."
-        ls_read = signatures.read(idx);
+        ls_read = signatures.read(idx)
         dist.append(compare_signatures(ls_obs, ls_read))
 
     #find smallest distance
-    smallest_d = dist[0]
-    smallest_idx = 0
-    for i in xrange(1,len(dist)):
-        if dist[i] < smallest_d:
-            smallest_d = dist[i]
-            smallest_idx = i
+    smallest_idx = get_smallest_index(dist)
 
+    # Reload the chosen signature and try and calculate starting angle
     chosen_sig = signatures.read(smallest_idx)
     angle = estimate_angle(chosen_sig, ls_obs)
 
     return (smallest_idx,angle)
 
+# Try to recover the starting angle by comparing two signatures
 def estimate_angle(chosen,observed):
-    c = np.array(chosen.sig)
-    o = np.array(observed.sig)
     meansq = []
     for i in xrange(len(c)):
-        res = np.roll(c,-i) - o
-        res = res**2
-        meansq.append(res.sum())
+        meansq.append(mean_squared_distance(np.roll(chosen,-i),observed))
 
-    smallest_d = meansq[0]
-    smallest_idx = 0
-    for i in xrange(1,len(meansq)):
-        if meansq[i] < smallest_d:
-            smallest_d = meansq[i]
-            smallest_idx = i
+    smallest_idx = get_smallest_index(meansq)
 
     return float(smallest_idx)*360.0/float(noSonarReadings)
 
-# Prior to starting learning the locations, it should delete files from previous
-# learning either manually or by calling signatures.delete_loc_files().
-# Then, either learn a location, until all the locations are learned, or try to
-# recognize one of them, if locations have already been learned.
+# Sorts a list, but returns a list of indicies
+def sort_by_index(list):
+    return [i[0] for i in sorted(enumerate(list), key=lambda x:x[1])]
+
+# Gets the index of the smallest element of a list
+def get_smallest_index(list):
+    return sort_by_index(list)[0]
+
+# Gets the sum of the squared differences of two vectors
+def mean_squared_distance(v1,v2):
+    res = np.array(v1) - np.array(v2)
+    res = res**2
+    return res.sum()
+
+
+# Number of readings to take, angle increment is 360/noSonarReadings
 noSonarReadings = 50
-signatures = SignatureContainer(5)
+# Number of unique waypoints
+noWaypoints = 5
+# Empty signature container
+signatures = SignatureContainer(noWaypoints)
 learning = False
+useRobot = False
 if learning:
     # Delete old data
     signatures.delete_loc_files()
@@ -175,7 +176,6 @@ if learning:
         print w
         particles = ps.Particles((x,y,0.0),1)
         learn_location()
-
 
     # Load learned data
     for i in xrange(5):
