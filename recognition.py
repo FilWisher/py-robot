@@ -106,22 +106,22 @@ class Recognition:
       print 'loaded : ', i,
       self.signatures.read(i)
       
-  def sim_Learn(self):
+  def sim_learn(self):
     # Delete old data
     self.signatures.delete_loc_files()
     # Do learning
     for w in self.waypoints:
         x,y = w
         print w
-        self.particles = ps.Particles((x,y,0.0),1)
+        self.particles = ps.Particles((x,y,0),1)
         self.learn_location()
   
   def sim_testRecognition(self,starting_angle=0):  
     for i in xrange(5):
         x, y = self.waypoints[i]
-        self.particles = ps.Particles((x,y,starting_angle),1)
+        self.particles = ps.Particles((x,y,0),1)
         res = self.recognize_location()
-        print 'expected ', i, ' got ', res[0], ' got angle ', res[1]
+        print 'expected ', i, ' got ', res[0], ' angle is between ', res[1]
         
   def sim_recognise(self,x,y,angle):
     self.particles = ps.Particles((x,y,angle),1)
@@ -191,6 +191,7 @@ class Recognition:
           meansq.append(mean_squared_distance(np.roll(chosen,-i),observed))
 
       smallest_idx = get_smallest_index(meansq)
-
-      return float(smallest_idx)*360.0/float(self.noSonarReadings)
+      min = float(smallest_idx-1)*360.0/float(self.noSonarReadings)
+      max = float(smallest_idx+1)*360.0/float(self.noSonarReadings)
+      return (min,max+1)
 

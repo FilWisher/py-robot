@@ -222,8 +222,8 @@ class Particles:
         #update particle position after moving cm distance
         for i in range(len(self.data)):
                 x,y,theta = self.data[i]
-                e = random.gauss(0,0.5)
-                f = random.gauss(0,0.1)
+                e = random.gauss(0,0.5+0.5)
+                f = random.gauss(0,0.1+0.5)
 
                 self.data[i] = ((x + (cm + e)*np.cos(np.deg2rad(theta))), (y + (cm + e)*np.sin(np.deg2rad(theta))), (theta + f))
 

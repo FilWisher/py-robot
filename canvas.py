@@ -6,7 +6,6 @@ import time
 import random
 import math
 import numpy as np
-#import robot
 import particles as ps
 
 def roundTuple(t):
@@ -101,7 +100,7 @@ class WaypointNavigation:
         self.initialWaypoint = initialWaypoint
 
     def navigate(self):
-        current_location = self.initial_location
+        current_location = self.particles.mean()
 
         for i,waypoint in enumerate(self.waypoints):
             print '\n\nNavigation', i+1, 'from', roundTuple(current_location),'to',roundTuple(waypoint)
