@@ -193,5 +193,5 @@ class Recognition:
       smallest_idx = get_smallest_index(meansq)
       min = float(smallest_idx-1)*360.0/float(self.noSonarReadings)
       max = float(smallest_idx+1)*360.0/float(self.noSonarReadings)
-      return (min,max+1)
+      return (min,max)
 

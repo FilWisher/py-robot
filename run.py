@@ -8,7 +8,7 @@ from canvas import *
 from recognition import *
 
 ##########################
-run_option = 3           #
+run_option = 2           #
 use_robot = False        #
 ##########################
 
@@ -28,7 +28,7 @@ if run_option == 1:
 # 2. Test learning and recognition
 ######################################################
 if run_option == 2:
-  test = Recognition(False,waypoints_cw4,4)
+  test = Recognition(False,waypoints_cw4,60)
   # Learn all the waypoints
   test.sim_learn()
   # Try to recognise all the waypoints
