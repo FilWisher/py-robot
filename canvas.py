@@ -6,7 +6,7 @@ import time
 import random
 import math
 import numpy as np
-import robot
+#import robot
 import particles as ps
 
 def roundTuple(t):
@@ -91,7 +91,7 @@ def move(current_loc, destination,mcl=False):
     if useRobot:
         measurement = robot.getSensorMeasurement()
     else:
-        measurement = particles.getFakeSensorMeasurement(particles.mean(),theMap.getWalls())
+        measurement = particles.getFakeSensorMeasurement(theMap.getWalls(),canvas=canvas)
     print "measurement: ", measurement
 
     if mcl:
@@ -175,25 +175,25 @@ theMap.draw();
 
 waypoints = []
 # CW 3 WAYPOINTS
-# waypoints.append((180, 30))
-# waypoints.append((180, 54))
-# waypoints.append((138, 54))
-# waypoints.append((138, 168))
-# waypoints.append((114, 168))
-# waypoints.append((114, 84))
-# waypoints.append((84, 84))
-# waypoints.append((84, 30))
-
+waypoints.append((180, 30))
+waypoints.append((180, 54))
+waypoints.append((138, 54))
+waypoints.append((138, 168))
+waypoints.append((114, 168))
+waypoints.append((114, 84))
+waypoints.append((84, 84))
+waypoints.append((84, 30))
 # CW 4 WAYPOINTS
+"""
 waypoints.append((84, 30))
 waypoints.append((180, 30))
 waypoints.append((180, 54))
 waypoints.append((138, 54))
 waypoints.append((138, 168))
-
+"""
 drawParticles = True
 useRobot = False
-doWaypointNavigation = True
+doWaypointNavigation = False
 walls = theMap.getWalls()
 
 if doWaypointNavigation:
