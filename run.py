@@ -24,7 +24,7 @@ if run_option == 1:
 ######################################################
 if run_option == 2:
   test = Recognition(False,waypoints_cw4,100)
-  #test.simulateLearning()
+  test.simulateLearning()
   test.sim_testRecognition(111)
 
 # 3. Combine the last two
