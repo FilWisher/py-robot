@@ -193,7 +193,7 @@ waypoints.append((138, 168))
 
 drawParticles = True
 useRobot = False
-doWaypointNavigation = False
+doWaypointNavigation = True
 walls = theMap.getWalls()
 
 if doWaypointNavigation:
@@ -206,4 +206,4 @@ if doWaypointNavigation:
 
     for i,waypoint in enumerate(waypoints):
         print '\n\nNavigation', i+1, 'from', roundTuple(current_location),'to',roundTuple(waypoint)
-        current_location = move_in_steps(current_location,waypoint)
+        current_location = move(current_location,waypoint)
