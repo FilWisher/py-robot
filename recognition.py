@@ -6,6 +6,20 @@ import random
 import os
 from canvas import *
 
+# Sorts a list, but returns a list of indicies
+def sort_by_index(list):
+    return [i[0] for i in sorted(enumerate(list), key=lambda x:x[1])]
+
+# Gets the index of the smallest element of a list
+def get_smallest_index(list):
+    return sort_by_index(list)[0]
+
+# Gets the sum of the squared differences of two vectors
+def mean_squared_distance(v1,v2):
+    res = np.array(v1) - np.array(v2)
+    res = res**2
+    return res.sum()
+
 #
 # Location signature class: stores a signature characterizing one location
 class LocationSignature:
@@ -17,7 +31,8 @@ class LocationSignature:
 
 # --------------------- File management class ---------------
 class SignatureContainer():
-    def __init__(self, size = 5):
+    def __init__(self,noSonarReadings, size = 5):
+        self.noSonarReadings = noSonarReadings
         self.size      = size; # max number of signatures that can be stored
         self.filenames = [];
 
@@ -64,7 +79,7 @@ class SignatureContainer():
     # Read signature file identified by index. If the file doesn't exist
     # it returns an empty signature.
     def read(self, index):
-        ls = LocationSignature(noSonarReadings)
+        ls = LocationSignature(self.noSonarReadings)
         filename = self.filenames[index]
         if os.path.isfile(filename):
             f = open(filename, 'r')
@@ -77,114 +92,105 @@ class SignatureContainer():
             print "WARNING: Signature does not exist."
 
         return ls
-
-# FILL IN: spin robot or sonar to capture a signature and store it in ls
-def characterize_location(ls):
-    for i in range(len(ls.sig)):
-        angle = float(i) * 360.0/float(len(ls.sig))
-        ls.sig[i] = int(particles.getFakeSensorMeasurement(walls,angle,canvas))
-
-
-# FILL IN: compare two signatures
-def compare_signatures(ls1, ls2):
-    #histogram returns a tuple of histogram and spacing bins -only take the histogram
-    h1 = np.histogram(ls1.sig,bins=20,range=(0,255),normed=True)[0]
-    h2 = np.histogram(ls2.sig,bins=20,range=(0,255),normed=True)[0]
-    return mean_squared_distance(h1,h2)
-
-# This function characterizes the current location, and stores the obtained
-# signature into the next available file.
-def learn_location():
-    ls = LocationSignature(noSonarReadings)
-    characterize_location(ls)
-    idx = signatures.get_free_index();
-    if (idx == -1): # run out of signature files
-        print "\nWARNING:"
-        print "No signature file is available. NOTHING NEW will be learned and stored."
-        print "Please remove some loc_%%.dat files.\n"
-        return
-
-    signatures.save(ls,idx)
-    print "STATUS:  Location " + str(idx) + " learned and saved."
-
-# This function tries to recognize the current location.e
-# 1.   Characterize current location
-# 2.   For every learned locations
-# 2.1. Read signature of learned location from file
-# 2.2. Compare signature to signature coming from actual characterization
-# 3.   Retain the learned location whose minimum distance with
-#      actual characterization is the smallest.
-# 4.   Display the index of the recognized location on the screen
-def recognize_location():
-    ls_obs = LocationSignature(noSonarReadings)
-    characterize_location(ls_obs)
-    dist = []
-    # FILL IN: COMPARE ls_read with ls_obs and find the best match
-    for idx in range(signatures.size):
-        # print "STATUS:  Comparing signature " + str(idx) + " with the observed signature."
-        ls_read = signatures.read(idx)
-        dist.append(compare_signatures(ls_obs, ls_read))
-
-    #find smallest distance
-    smallest_idx = get_smallest_index(dist)
-
-    # Reload the chosen signature and try and calculate starting angle
-    chosen_sig = signatures.read(smallest_idx)
-    angle = estimate_angle(chosen_sig, ls_obs)
-
-    return (smallest_idx,angle)
-
-# Try to recover the starting angle by comparing two signatures
-def estimate_angle(chosen,observed):
-    meansq = []
-    for i in xrange(len(c)):
-        meansq.append(mean_squared_distance(np.roll(chosen,-i),observed))
-
-    smallest_idx = get_smallest_index(meansq)
-
-    return float(smallest_idx)*360.0/float(noSonarReadings)
-
-# Sorts a list, but returns a list of indicies
-def sort_by_index(list):
-    return [i[0] for i in sorted(enumerate(list), key=lambda x:x[1])]
-
-# Gets the index of the smallest element of a list
-def get_smallest_index(list):
-    return sort_by_index(list)[0]
-
-# Gets the sum of the squared differences of two vectors
-def mean_squared_distance(v1,v2):
-    res = np.array(v1) - np.array(v2)
-    res = res**2
-    return res.sum()
-
-
-# Number of readings to take, angle increment is 360/noSonarReadings
-noSonarReadings = 50
-# Number of unique waypoints
-noWaypoints = 5
-# Empty signature container
-signatures = SignatureContainer(noWaypoints)
-learning = False
-useRobot = False
-if learning:
+    
+class Recognition:
+  def __init__(self,useRobot,waypoints,noSonarReadings):
+    self.useRobot = useRobot
+    self.waypoints = waypoints
+    self.noWaypoints = len(waypoints)
+    self.noSonarReadings = noSonarReadings
+    self.signatures = SignatureContainer(self.noSonarReadings,self.noWaypoints)
+    
+  def loadExisitingData(self):
+    for i in xrange(5):
+      print 'loaded : ', i,
+      self.signatures.read(i)
+      
+  def sim_Learn(self):
     # Delete old data
-    signatures.delete_loc_files()
+    self.signatures.delete_loc_files()
     # Do learning
-    for w in waypoints:
+    for w in self.waypoints:
         x,y = w
         print w
-        particles = ps.Particles((x,y,0.0),1)
-        learn_location()
-
-    # Load learned data
+        self.particles = ps.Particles((x,y,0.0),1)
+        self.learn_location()
+  
+  def sim_testRecognition(self,starting_angle=0):  
     for i in xrange(5):
-        print 'loaded : ', i,
-        signatures.read(i)
+        x, y = self.waypoints[i]
+        self.particles = ps.Particles((x,y,starting_angle),1)
+        res = self.recognize_location()
+        print 'expected ', i, ' got ', res[0], ' got angle ', res[1]
+        
+  def sim_recognise(self,x,y,angle):
+    self.particles = ps.Particles((x,y,angle),1)
+    return self.recognize_location()
+    
+        
+  # FILL IN: spin robot or sonar to capture a signature and store it in ls
+  def characterize_location(self,ls):
+      for i in range(len(ls.sig)):
+          angle = float(i) * 360.0/float(len(ls.sig))
+          ls.sig[i] = int(self.particles.getFakeSensorMeasurement(walls,angle,canvas))
 
-# Do recognition at each waypoint
-for i in xrange(5):
-    x, y = waypoints[i]
-    particles = ps.Particles((x,y,111),1)
-    res = recognize_location()
-    print 'expected ', i, ' got ', res[0], ' got angle ', res[1]
+
+  # FILL IN: compare two signatures
+  def compare_signatures(self,ls1, ls2):
+      #histogram returns a tuple of histogram and spacing bins -only take the histogram
+      h1 = np.histogram(ls1.sig,bins=20,range=(0,255),normed=True)[0]
+      h2 = np.histogram(ls2.sig,bins=20,range=(0,255),normed=True)[0]
+      return mean_squared_distance(h1,h2)
+
+  # This function characterizes the current location, and stores the obtained
+  # signature into the next available file.
+  def learn_location(self):
+      ls = LocationSignature(self.noSonarReadings)
+      self.characterize_location(ls)
+      idx = self.signatures.get_free_index();
+      if (idx == -1): # run out of signature files
+          print "\nWARNING:"
+          print "No signature file is available. NOTHING NEW will be learned and stored."
+          print "Please remove some loc_%%.dat files.\n"
+          return
+
+      self.signatures.save(ls,idx)
+      print "STATUS:  Location " + str(idx) + " learned and saved."
+
+  # This function tries to recognize the current location.e
+  # 1.   Characterize current location
+  # 2.   For every learned locations
+  # 2.1. Read signature of learned location from file
+  # 2.2. Compare signature to signature coming from actual characterization
+  # 3.   Retain the learned location whose minimum distance with
+  #      actual characterization is the smallest.
+  # 4.   Display the index of the recognized location on the screen
+  def recognize_location(self):
+      ls_obs = LocationSignature(self.noSonarReadings)
+      self.characterize_location(ls_obs)
+      dist = []
+      # FILL IN: COMPARE ls_read with ls_obs and find the best match
+      for idx in range(self.signatures.size):
+          # print "STATUS:  Comparing signature " + str(idx) + " with the observed signature."
+          ls_read = self.signatures.read(idx)
+          dist.append(self.compare_signatures(ls_obs, ls_read))
+
+      #find smallest distance
+      smallest_idx = get_smallest_index(dist)
+
+      # Reload the chosen signature and try and calculate starting angle
+      chosen_sig = self.signatures.read(smallest_idx)
+      angle = self.estimate_angle(chosen_sig.sig, ls_obs.sig)
+
+      return (smallest_idx,angle)
+
+  # Try to recover the starting angle by comparing two signatures
+  def estimate_angle(self,chosen,observed):
+      meansq = []
+      for i in xrange(len(chosen)):
+          meansq.append(mean_squared_distance(np.roll(chosen,-i),observed))
+
+      smallest_idx = get_smallest_index(meansq)
+
+      return float(smallest_idx)*360.0/float(self.noSonarReadings)
+

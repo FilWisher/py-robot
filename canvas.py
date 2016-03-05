@@ -12,109 +12,6 @@ import particles as ps
 def roundTuple(t):
     return tuple(map(lambda x: round (x,3), t))
 
-def calculate_movement(current, destination):
-    current_x, current_y, current_theta = current
-    x, y = destination
-    dx = x - current_x
-    dy = y - current_y
-
-    d = np.sqrt(dx**2+dy**2)
-    d_theta = np.rad2deg(np.arctan2(dy,dx))-current_theta
-    if(d_theta > 180):
-        d_theta -= 360
-    elif(d_theta < -180):
-        d_theta += 360
-
-    return d, d_theta
-
-def move_in_steps(current_loc,destination,step_size=10):
-
-    def vector_length(x,y):
-        return np.sqrt(x**2 + y**2)
-
-    x0, y0, theta0 = current_loc
-    x1, y1 = destination
-
-    dx = x1 - x0
-    dy = y1 - y0
-
-    # normalise dx, dy to get a unit vector
-    norm = np.sqrt(dx**2 + dy**2)
-    dx /= norm
-    dy /= norm
-
-    print 'Unit vector : ', roundTuple((dx,dy))
-
-    while True:
-        new_x = x0 + dx*step_size
-        new_y = y0 + dy*step_size
-        if( vector_length(dx*step_size,dy*step_size) < vector_length(x1-x0,y1-y0)  ):
-            newLocation = move((x0,y0,theta0),(new_x,new_y),True)
-            x0, y0, theta0 = newLocation
-        else:
-            return move((x0,y0,theta0), destination,True)
-
-# This only does mcl for the first step
-def move_in_steps_reduced(current_loc,destination,step_size=10):
-
-    def vector_length(x,y):
-        return np.sqrt(x**2 + y**2)
-
-    x0, y0, theta0 = current_loc
-    x1, y1 = destination
-
-    dx = x1 - x0
-    dy = y1 - y0
-
-    # normalise dx, dy to get a unit vector
-    norm = np.sqrt(dx**2 + dy**2)
-    dx /= norm
-    dy /= norm
-
-    print 'Unit vector : ', roundTuple((dx,dy))
-    first = True
-    while True:
-        new_x = x0 + dx*step_size
-        new_y = y0 + dy*step_size
-        if( vector_length(dx*step_size,dy*step_size) < vector_length(x1-x0,y1-y0)  ):
-            newLocation = move((x0,y0,theta0),(new_x,new_y),mcl=first)
-            first = False
-            x0, y0, theta0 = newLocation
-        else:
-            return move((x0,y0,theta0), destination)
-
-def move(current_loc, destination,mcl=False):
-
-    if drawParticles:
-        canvas.drawParticles(particles.data)
-
-    if useRobot:
-        measurement = robot.getSensorMeasurement()
-    else:
-        measurement = particles.getFakeSensorMeasurement(theMap.getWalls(),canvas=canvas)
-    print "measurement: ", measurement
-
-    if mcl:
-        particles.do_mcl(theMap.getWalls(), measurement)
-
-    print "mean: ", roundTuple(particles.mean()), " wanted: ", roundTuple(destination)
-
-    distance, angle = calculate_movement(current_loc, destination)
-    if useRobot:
-        if(abs(angle) > 2.0):
-            print 'Turning ', round(angle,1),
-            robot.left(angle)
-        print ' moving forwards ', round(distance,1)
-        robot.forwards(distance)
-    if(abs(angle) > 2.0):
-        particles.left(angle)
-    particles.forwards(distance)
-
-
-    if drawParticles:
-        canvas.drawParticles(particles.data)
-    return particles.mean()
-
 # A Canvas class for drawing a map and particles:
 #     - it takes care of a proper scaling and coordinate transformation between
 #      the map frame of reference (in cm) and the display (in pixels)
@@ -144,8 +41,9 @@ class Canvas:
 
 # A Map class containing walls
 class Map:
-    def __init__(self):
+    def __init__(self,canvas):
         self.walls = [];
+        self.canvas = canvas
 
     def add_wall(self,wall):
         self.walls.append(wall);
@@ -155,13 +53,32 @@ class Map:
 
     def draw(self):
         for wall in self.walls:
-            canvas.drawLine(wall);
+            self.canvas.drawLine(wall);
 
     def getWalls(self):
         return self.walls
 
+# CW 3 WAYPOINTS
+waypoints_cw3 = []
+waypoints_cw3.append((180, 30))
+waypoints_cw3.append((180, 54))
+waypoints_cw3.append((138, 54))
+waypoints_cw3.append((138, 168))
+waypoints_cw3.append((114, 168))
+waypoints_cw3.append((114, 84))
+waypoints_cw3.append((84, 84))
+waypoints_cw3.append((84, 30))
+# CW 4 WAYPOINTS
+waypoints_cw4 = []
+waypoints_cw4.append((84, 30))
+waypoints_cw4.append((180, 30))
+waypoints_cw4.append((180, 54))
+waypoints_cw4.append((138, 54))
+waypoints_cw4.append((138, 168))
+
+
 canvas = Canvas();    # global canvas we are going to draw on
-theMap = Map();
+theMap = Map(canvas);
 # Definitions of walls
 theMap.add_wall((0,0,0,168));        # a
 theMap.add_wall((0,168,84,168));     # b
@@ -172,38 +89,96 @@ theMap.add_wall((168,84,210,84));    # f
 theMap.add_wall((210,84,210,0));     # g
 theMap.add_wall((210,0,0,0));        # h
 theMap.draw();
-
-waypoints = []
-# CW 3 WAYPOINTS
-waypoints.append((180, 30))
-waypoints.append((180, 54))
-waypoints.append((138, 54))
-waypoints.append((138, 168))
-waypoints.append((114, 168))
-waypoints.append((114, 84))
-waypoints.append((84, 84))
-waypoints.append((84, 30))
-# CW 4 WAYPOINTS
-"""
-waypoints.append((84, 30))
-waypoints.append((180, 30))
-waypoints.append((180, 54))
-waypoints.append((138, 54))
-waypoints.append((138, 168))
-"""
-drawParticles = True
-useRobot = False
-doWaypointNavigation = False
 walls = theMap.getWalls()
 
-if doWaypointNavigation:
+class WaypointNavigation:
+    def __init__(self,useRobot,waypoints,initialWaypoint,noParticles,startAngle=0):
+        self.useRobot = useRobot
+        self.waypoints = waypoints
+        x0, y0 = waypoints[initialWaypoint]
+        self.initial_location = (x0,y0,startAngle)
+        self.particles = ps.Particles(self.initial_location,noParticles)
+        self.initialWaypoint = initialWaypoint
 
-    initial_location = (84,30,0)
-    numberOfParticles = 100
-    particles = ps.Particles(initial_location,numberOfParticles);
+    def navigate(self):
+        current_location = self.initial_location
 
-    current_location = initial_location
+        for i,waypoint in enumerate(self.waypoints):
+            print '\n\nNavigation', i+1, 'from', roundTuple(current_location),'to',roundTuple(waypoint)
+            current_location = self.move_in_steps(current_location,waypoint)
 
-    for i,waypoint in enumerate(waypoints):
-        print '\n\nNavigation', i+1, 'from', roundTuple(current_location),'to',roundTuple(waypoint)
-        current_location = move(current_location,waypoint)
+    def calculate_movement(self,current, destination):
+        current_x, current_y, current_theta = current
+        x, y = destination
+        dx = x - current_x
+        dy = y - current_y
+
+        d = np.sqrt(dx**2+dy**2)
+        d_theta = np.rad2deg(np.arctan2(dy,dx))-current_theta
+        if(d_theta > 180):
+            d_theta -= 360
+        elif(d_theta < -180):
+            d_theta += 360
+
+        return d, d_theta
+
+    def move_in_steps(self,current_loc,destination,step_size=10):
+
+        def vector_length(x,y):
+            return np.sqrt(x**2 + y**2)
+
+        x0, y0, theta0 = current_loc
+        x1, y1 = destination
+
+        dx = x1 - x0
+        dy = y1 - y0
+
+        # normalise dx, dy to get a unit vector
+        norm = np.sqrt(dx**2 + dy**2)
+        if norm > 0:
+          dx /= norm
+          dy /= norm
+        else:
+          dx = 0.0
+          dy = 0.0
+
+        print 'Unit vector : ', roundTuple((dx,dy))
+
+        while True:
+            new_x = x0 + dx*step_size
+            new_y = y0 + dy*step_size
+            if( vector_length(dx*step_size,dy*step_size) < vector_length(x1-x0,y1-y0)  ):
+                newLocation = self.move((x0,y0,theta0),(new_x,new_y),True)
+                x0, y0, theta0 = newLocation
+            else:
+                return self.move((x0,y0,theta0), destination,True)
+
+    def move(self,current_loc, destination,mcl=False):
+
+        canvas.drawParticles(self.particles.data)
+
+        if self.useRobot:
+            measurement = self.robot.getSensorMeasurement()
+        else:
+            measurement = self.particles.getFakeSensorMeasurement(walls,canvas=canvas)
+        print "measurement: ", measurement
+
+        if mcl:
+            self.particles.do_mcl(walls, measurement)
+
+        print "mean: ", roundTuple(self.particles.mean()), " wanted: ", roundTuple(destination)
+
+        distance, angle = self.calculate_movement(current_loc, destination)
+        if self.useRobot:
+            if(abs(angle) > 2.0):
+                print 'Turning ', round(angle,1),
+                robot.left(angle)
+            print ' moving forwards ', round(distance,1)
+            robot.forwards(distance)
+        if(abs(angle) > 2.0):
+            self.particles.left(angle)
+        self.particles.forwards(distance)
+
+
+        canvas.drawParticles(self.particles.data)
+        return self.particles.mean()
