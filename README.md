@@ -2,6 +2,7 @@
 uncertain robot on brickpi
 
 ### File structure
+* `archive/` - needs sorting
 * `canvas.py` - draws on the canvas and defines the walls of the environment
 * `navigation.py` - navigates a robot through the environment using particles class
 * `particles.py` - defines a particle class which supports MCL localisation
