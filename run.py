@@ -47,7 +47,7 @@ if run_option == 3:
   start_angle = 100
   # The waypoint index at which the robot starts at
   waypoint_idx = 3
-  x,y = waypoints_cw3[waypoint_idx]
+  x,y = waypoints_cw4[waypoint_idx]
   # Create a recognition class
   rec = Recognition(False,waypoints_cw4,walls,200)
   # Try and recognise the waypoint
