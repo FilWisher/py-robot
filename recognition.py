@@ -92,20 +92,21 @@ class SignatureContainer():
             print "WARNING: Signature does not exist."
 
         return ls
-    
+
 class Recognition:
-  def __init__(self,useRobot,waypoints,noSonarReadings):
+  def __init__(self,useRobot,waypoints,walls,noSonarReadings):
     self.useRobot = useRobot
+    self.walls = walls
     self.waypoints = waypoints
     self.noWaypoints = len(waypoints)
     self.noSonarReadings = noSonarReadings
     self.signatures = SignatureContainer(self.noSonarReadings,self.noWaypoints)
-    
+
   def loadExisitingData(self):
     for i in xrange(5):
       print 'loaded : ', i,
       self.signatures.read(i)
-      
+
   def sim_learn(self):
     # Delete old data
     self.signatures.delete_loc_files()
@@ -115,24 +116,24 @@ class Recognition:
         print w
         self.particles = ps.Particles((x,y,0),1)
         self.learn_location()
-  
-  def sim_testRecognition(self,starting_angle=0):  
+
+  def sim_testRecognition(self,starting_angle=0):
     for i in xrange(5):
         x, y = self.waypoints[i]
         self.particles = ps.Particles((x,y,0),1)
         res = self.recognize_location()
         print 'expected ', i, ' got ', res[0], ' angle is between ', res[1]
-        
+
   def sim_recognise(self,x,y,angle):
     self.particles = ps.Particles((x,y,angle),1)
     return self.recognize_location()
-    
-        
+
+
   # FILL IN: spin robot or sonar to capture a signature and store it in ls
   def characterize_location(self,ls):
       for i in range(len(ls.sig)):
           angle = float(i) * 360.0/float(len(ls.sig))
-          ls.sig[i] = int(self.particles.getFakeSensorMeasurement(walls,angle,canvas))
+          ls.sig[i] = int(self.particles.getFakeSensorMeasurement(self.walls,angle,canvas))
 
 
   # FILL IN: compare two signatures
@@ -194,4 +195,3 @@ class Recognition:
       min = float(smallest_idx-1)*360.0/float(self.noSonarReadings)
       max = float(smallest_idx+1)*360.0/float(self.noSonarReadings)
       return (min,max)
-
