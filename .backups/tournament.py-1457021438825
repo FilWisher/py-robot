@@ -1,8 +1,0 @@
-print 'Win'
-
-
-import canvas as canv
-import recognition as rec
-
-
-#use canvas functions to do waypoint navigation after recognising where we are in the labyrinth

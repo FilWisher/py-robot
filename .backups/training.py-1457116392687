@@ -1,9 +1,0 @@
-from canvas import *
-from recognition import *
-
-signatures = SignatureContainer(5)
-
-for w in waypoints:
-    x,y = w
-    current_location = (x,y,0)
-    learn_location()
