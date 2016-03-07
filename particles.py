@@ -215,15 +215,15 @@ class Particles:
     def left(self, deg):
         for i in range(len(self.data)):
             x,y,theta = self.data[i]
-            g = random.gauss(0,0.1)
+            g = random.gauss(0,0.4)
             self.data[i] = (x, y, theta + deg + g)
 
     def forwards(self, cm):
         #update particle position after moving cm distance
         for i in range(len(self.data)):
                 x,y,theta = self.data[i]
-                e = random.gauss(0,0.5+0.5)
-                f = random.gauss(0,0.1+0.5)
+                e = random.gauss(0,2.0)
+                f = random.gauss(0,2.0)
 
                 self.data[i] = ((x + (cm + e)*np.cos(np.deg2rad(theta))), (y + (cm + e)*np.sin(np.deg2rad(theta))), (theta + f))
 

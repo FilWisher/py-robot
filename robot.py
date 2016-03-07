@@ -17,7 +17,7 @@ class Robot(object):
     # Motor Movement correction. Radians per centimeter
     RADS_PCM = 0.386
     # Motor Rotation correction. Radians per degree
-    RADS_PDG = 0.0517
+    RADS_PDG = 0.0526
     # Sonar Rotation correction.
     SONAR_RADS_PDG = 0.027
 

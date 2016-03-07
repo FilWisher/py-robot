@@ -54,6 +54,7 @@ class WaypointNavigation:
         for i,waypoint in enumerate(self.waypoints):
             print '\n\nNavigation', i+1, 'from', roundTuple(current_location),'to',roundTuple(waypoint)
             current_location = self.move_in_steps(current_location,waypoint)
+            time.sleep(0.0)
 
     def calculate_movement(self,current, destination):
         current_x, current_y, current_theta = current
@@ -70,7 +71,7 @@ class WaypointNavigation:
 
         return d, d_theta
 
-    def move_in_steps(self,current_loc,destination,step_size=10):
+    def move_in_steps(self,current_loc,destination,step_size=40):
 
         def vector_length(x,y):
             return np.sqrt(x**2 + y**2)
