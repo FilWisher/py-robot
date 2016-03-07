@@ -17,9 +17,9 @@ class Robot(object):
     # Motor Movement correction. Radians per centimeter
     RADS_PCM = 0.380
     # Motor Rotation correction. Radians per degree
-    RADS_PDG = 0.0530
+    RADS_PDG = 0.0525
     # Sonar Rotation correction.
-    SONAR_RADS_PDG = 0.027
+    SLOW_RADS_PDG = 0.0509
 
     # SENSOR port
     port = 3
@@ -148,7 +148,7 @@ class Robot(object):
     def measure360(self):
         self.changeSpeed(1.0, 2.0)
         print 'ouiahsfioahnfs'
-        rads = self.RADS_PDG*360
+        rads = self.SLOW_RADS_PDG*360
         l0,r0 = self.getAngles()
 
         self.interface.increaseMotorAngleReferences(self.motors, [-rads, rads])

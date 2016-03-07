@@ -8,8 +8,8 @@ from navigation import *
 from recognition import *
 
 ##########################
-run_option = 6          #
-use_robot = True        #
+run_option = 6           #
+use_robot = True         #
 ##########################
 
 if use_robot:
@@ -59,12 +59,13 @@ if run_option == 3:
   print 'Expected ', (waypoint_idx,(start_angle,start_angle)), ' got ', result
 
   # Shift the waypoints to account for the starting position
+  target_wp = waypoints_cw4[result[0]]
   waypoints = shift(waypoints_cw4,result[0]+1)
   print result[0], waypoints
   # Number of particles for mcl
   noParticles = 100
   # Create a navigation class
-  nav = WaypointNavigation(waypoints,result[0]-1,noParticles, robot)
+  nav = WaypointNavigation(waypoints,target_wp,noParticles)
   # since we can only estimate an angular range, set up the particles
   # in this range
   nav.init_angular_uncertainity(result[1])
@@ -74,7 +75,7 @@ if run_option == 3:
 # 4. Learn location signature with real robot
 ######################################################
 if run_option == 4:
-  test = Recognition(waypoints_cw4,walls,360,robot)
+  test = Recognition(waypoints_cw4,walls,720,robot)
   # Learn a waypoints
   test.learn_location()
 

@@ -199,6 +199,6 @@ class Recognition:
           meansq.append(mean_squared_distance(np.roll(chosen,-i),observed))
 
       smallest_idx = get_smallest_index(meansq)
-      min = float(smallest_idx-1)*360.0/float(self.noSonarReadings)
+      min = float(smallest_idx)*360.0/float(self.noSonarReadings)
       max = float(smallest_idx+1)*360.0/float(self.noSonarReadings)
       return (min,max)
