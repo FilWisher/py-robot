@@ -94,8 +94,11 @@ class SignatureContainer():
         return ls
 
 class Recognition:
-  def __init__(self,useRobot,waypoints,walls,noSonarReadings):
-    self.useRobot = useRobot
+  def __init__(self,waypoints,walls,noSonarReadings, robot=None):
+
+    self.useRobot = (robot != None)
+    self.robot = robot
+
     self.walls = walls
     self.waypoints = waypoints
     self.noWaypoints = len(waypoints)
@@ -131,9 +134,13 @@ class Recognition:
 
   # FILL IN: spin robot or sonar to capture a signature and store it in ls
   def characterize_location(self,ls):
-      for i in range(len(ls.sig)):
-          angle = float(i) * 360.0/float(len(ls.sig))
-          ls.sig[i] = int(self.particles.getFakeSensorMeasurement(self.walls,angle,canvas))
+      if (self.useRobot):
+          ls.sig = self.robot.measure360()
+      else:
+          print "userobot: ", self.useRobot
+          for i in range(len(ls.sig)):
+              angle = float(i) * 360.0/float(len(ls.sig))
+              ls.sig[i] = int(self.particles.getFakeSensorMeasurement(self.walls,angle,canvas))
 
 
   # FILL IN: compare two signatures

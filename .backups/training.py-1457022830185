@@ -1,0 +1,6 @@
+from recognition import *
+from canvas import *
+
+signatures = SignatureContainer(5)
+print waypoints
+

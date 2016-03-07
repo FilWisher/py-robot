@@ -3,7 +3,7 @@
 import brickpi
 import sys
 import time
-
+import numpy as np
 import os
 import math
 
@@ -17,7 +17,7 @@ class Robot(object):
     # Motor Movement correction. Radians per centimeter
     RADS_PCM = 0.541
     # Motor Rotation correction. Radians per degree
-    RADS_PDG = 0.0348
+    RADS_PDG = 0.0517
     # Sonar Rotation correction.
     SONAR_RADS_PDG = 0.027
 
@@ -44,6 +44,7 @@ class Robot(object):
     # Initialized in init
     interface = []
     motors = []
+    motorParams = []
 
     # Robot init and exit
     def __init__(self):
@@ -63,19 +64,19 @@ class Robot(object):
         self.interface.motorEnable(motors[1])
         # self.interface.motorEnable(motors[2])
 
-        motorParams = self.interface.MotorAngleControllerParameters()
-        motorParams.maxRotationAcceleration = self.speed
-        motorParams.maxRotationSpeed = self.acceleration
-        motorParams.feedForwardGain = 255/20.0
-        motorParams.minPWM = 18.0
-        motorParams.pidParameters.minOutput = -255
-        motorParams.pidParameters.maxOutput = 255
-        motorParams.pidParameters.k_p = self.kp
-        motorParams.pidParameters.k_i = self.ki
-        motorParams.pidParameters.k_d = self.kd
+        self.motorParams = self.interface.MotorAngleControllerParameters()
+        self.motorParams.maxRotationAcceleration = self.acceleration
+        self.motorParams.maxRotationSpeed = self.speed
+        self.motorParams.feedForwardGain = 255/20.0
+        self.motorParams.minPWM = 18.0
+        self.motorParams.pidParameters.minOutput = -255
+        self.motorParams.pidParameters.maxOutput = 255
+        self.motorParams.pidParameters.k_p = self.kp
+        self.motorParams.pidParameters.k_i = self.ki
+        self.motorParams.pidParameters.k_d = self.kd
 
-        self.interface.setMotorAngleControllerParameters(motors[0], motorParams)
-        self.interface.setMotorAngleControllerParameters(motors[1], motorParams)
+        self.interface.setMotorAngleControllerParameters(motors[0], self.motorParams)
+        self.interface.setMotorAngleControllerParameters(motors[1], self.motorParams)
         # self.interface.setMotorAngleControllerParameters(motors[2], motorParams)
 
         return motors
@@ -87,11 +88,26 @@ class Robot(object):
     """
 
     # Motor Related
+
+    def changeSpeed(self, accel, veloc):
+        self.motorParams.maxRotationAcceleration = accel
+        self.motorParams.maxRotationSpeed = veloc
+
+        self.interface.setMotorAngleControllerParameters(self.motors[0], self.motorParams)
+        self.interface.setMotorAngleControllerParameters(self.motors[1], self.motorParams)
+
+    def resetSpeed(self):
+        self.motorParams.maxRotationAcceleration = self.acceleration
+        self.motorParams.maxRotationSpeed = self.speed
+
+        self.interface.setMotorAngleControllerParameters(self.motors[0], self.motorParams)
+        self.interface.setMotorAngleControllerParameters(self.motors[1], self.motorParams)
+
     def validateMove(self):
         while not self.interface.motorAngleReferencesReached(self.motors):
             time.sleep(0.1)
 
-    def get_angles(self):
+    def getAngles(self):
         angles = self.interface.getMotorAngles(self.motors)
         return angles[0][0], angles[1][0]
 
@@ -104,17 +120,47 @@ class Robot(object):
     # Sonar Related
     def getSensorMeasurement(self):
         # 18 is distance of sensor from center of rotation
-        time.sleep(0.1)
-    	return self.interface.getSensorValue(self.port)
-   
+        time.sleep(0.01)
+    	return self.interface.getSensorValue(self.port)[0]
+
+    def _resampleData(self,angles,readings):
+        if(len(angles) != len(readings)):
+            print 'ERROR resampleData a different amount of readings and angles.'
+        numberOfBins=360
+        data = np.zeros(numberOfBins)
+        count = np.zeros(numberOfBins)
+
+        for i in range(len(angles)):
+            index = int(round(angles[i])) % 360
+            data[index] += float(readings[i])
+            count[index] += 1
+
+        for i in range(numberOfBins):
+            if(count[i] != 0):
+                data[i] /= float(count[i])
+
+        return data.astype(int).tolist()
+
     def measure360(self):
-        rads = self.RADS_PDG*360/20
-        
-        for i in range(0,20):
-            self.interface.increaseMotorAngleReferences(self.motors, [-rads, rads])
-            while not self.interface.motorAngleReferenceReached(self.motors):
-                print self.getSensorMeasurement()
-                time.sleep(0.1)
+        self.changeSpeed(1.0, 2.0)
+        print 'ouiahsfioahnfs'
+        rads = self.RADS_PDG*360
+        l0,r0 = self.getAngles()
+
+        self.interface.increaseMotorAngleReferences(self.motors, [-rads, rads])
+        angles = []
+        readings = []
+
+        while not self.interface.motorAngleReferencesReached(self.motors):
+            lc,rc = self.getAngles()
+            angles.append((abs(lc-l0) + abs(rc-r0))/(2.0*self.RADS_PDG))
+            readings.append(self.getSensorMeasurement())
+
+        print len(angles)
+        self.validateMove()
+        self.resetSpeed()
+
+        return self._resampleData(angles,readings)
 
     """
        Movement functions
@@ -178,7 +224,7 @@ if __name__ == "__main__":
             r.right(float(sys.argv[2]))
         elif (sys.argv[1] == 's'):
             print "hey"
-            r.measure360()
+            print r.measure360()
         elif (sys.argv[1] == 'z'):
             print "hey"
             print r.getSensorMeasurement()

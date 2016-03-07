@@ -31,9 +31,8 @@ waypoints_cw4.append((138, 54))
 waypoints_cw4.append((138, 168))
 
 class WaypointNavigation:
-    def __init__(self,waypoints,initialWaypoint,noParticles,startAngle=0,robot=None):
-        self.useRobot = robot != None
-        self.robot = robot
+    def __init__(self,useRobot,waypoints,initialWaypoint,noParticles,startAngle=0):
+        self.useRobot = useRobot
         self.waypoints = waypoints
         x0, y0 = waypoints[initialWaypoint]
         self.initial_location = (x0,y0,startAngle)
@@ -47,6 +46,7 @@ class WaypointNavigation:
         for i in xrange(N):
             x, y, theta = self.particles.data[i]
             self.particles.data[i] = (x, y, min + step*i)
+            print self.particles.data[i]
 
 
     def navigate(self):
