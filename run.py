@@ -92,15 +92,15 @@ if run_option == 6:
     rec = Recognition(waypoints_cw4,walls,360, robot)
     # Try and recognise the waypoint
     result = rec.recognize_location()
-    print 'Got ', result
+    print '######################## Got ', result
     target_wp = waypoints_cw4[result[0]]
     # Shift the waypoints to account for the starting position
-    waypoints = shift(waypoints_cw4,result[0])
+    waypoints = shift(waypoints_cw4,result[0]+1)
 
     # Number of particles for mcl
     noParticles = 100
     # Create a navigation class
-    nav = WaypointNavigation(waypoints[1:],target_wp,noParticles, robot=robot)
+    nav = WaypointNavigation(waypoints,target_wp,noParticles, robot=robot)
     # since we can only estimate an angular range, set up the particles
     # in this range
     nav.init_angular_uncertainity(result[1])
@@ -109,4 +109,5 @@ if run_option == 6:
 
 if run_option == 7:
     l = [0, 1, 2, 3, 4]
-    print shift(l, 4)
+    print l
+    print shift(l, 1)

@@ -100,6 +100,12 @@ class WaypointNavigation:
                 newLocation = self.move((x0,y0,theta0),(new_x,new_y),True)
                 x0, y0, theta0 = newLocation
             else:
+                x0, y0, theta0 = newLocation
+                xd, yd = destination
+                if(vector_length(x0-xd,y0-yd) > 2.0):
+                    print 'ZOES IDEA:::::::::::'
+                    newLocation = self.move((x0,y0,theta0),(new_x,new_y),True)
+
                 return self.move((x0,y0,theta0), destination,True)
 
     def move(self,current_loc, destination,mcl=False):

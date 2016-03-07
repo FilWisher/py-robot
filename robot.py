@@ -15,9 +15,9 @@ class Robot(object):
         <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     """
     # Motor Movement correction. Radians per centimeter
-    RADS_PCM = 0.386
+    RADS_PCM = 0.380
     # Motor Rotation correction. Radians per degree
-    RADS_PDG = 0.0526
+    RADS_PDG = 0.0530
     # Sonar Rotation correction.
     SONAR_RADS_PDG = 0.027
 
@@ -31,8 +31,8 @@ class Robot(object):
     RIGHT_WHEEL = 1.0
 
     # Robot speed
-    acceleration = 6.0
-    speed = 12.0
+    acceleration = 12.0
+    speed = 24.0
 
     # Robot PCI
     kp = 180
@@ -132,10 +132,12 @@ class Robot(object):
         data = np.zeros(numberOfBins)
         count = np.zeros(numberOfBins)
 
+        step = 360.0/float(numberOfBins)
         for i in range(len(angles)):
-            index = int(round(angles[i])) % 360
+            index = int(round(angles[i])/step) % numberOfBins
             data[index] += float(readings[i])
             count[index] += 1
+
 
         for i in range(numberOfBins):
             if(count[i] != 0):
