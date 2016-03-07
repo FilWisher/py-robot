@@ -15,7 +15,7 @@ class Robot(object):
         <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     """
     # Motor Movement correction. Radians per centimeter
-    RADS_PCM = 0.541
+    RADS_PCM = 0.386
     # Motor Rotation correction. Radians per degree
     RADS_PDG = 0.0517
     # Sonar Rotation correction.
@@ -24,9 +24,11 @@ class Robot(object):
     # SENSOR port
     port = 3
 
+    sensorCorrection = 12
+
     # Wheel adjustments
-    LEFT_WHEEL = 1.0
-    RIGHT_WHEEL = 0.991
+    LEFT_WHEEL = 0.995
+    RIGHT_WHEEL = 1.0
 
     # Robot speed
     acceleration = 6.0
@@ -121,7 +123,7 @@ class Robot(object):
     def getSensorMeasurement(self):
         # 18 is distance of sensor from center of rotation
         time.sleep(0.01)
-    	return self.interface.getSensorValue(self.port)[0]
+    	return self.interface.getSensorValue(self.port)[0] + self.sensorCorrection
 
     def _resampleData(self,angles,readings):
         if(len(angles) != len(readings)):
@@ -227,7 +229,8 @@ if __name__ == "__main__":
             print r.measure360()
         elif (sys.argv[1] == 'z'):
             print "hey"
-            print r.getSensorMeasurement()
+            while True:
+                print r.getSensorMeasurement()
         else:
             print_usage()
     except:

@@ -31,14 +31,13 @@ waypoints_cw4.append((138, 54))
 waypoints_cw4.append((138, 168))
 
 class WaypointNavigation:
-    def __init__(self,waypoints,initialWaypoint,noParticles,startAngle=0,robot=None):
-        self.useRobot = robot != None
+    def __init__(self,waypoints,initialLocation,noParticles,startAngle=0,robot=None):
+        self.useRobot = (robot != None)
         self.robot = robot
         self.waypoints = waypoints
-        x0, y0 = waypoints[initialWaypoint]
+        x0, y0 = initialLocation
         self.initial_location = (x0,y0,startAngle)
         self.particles = ps.Particles(self.initial_location,noParticles)
-        self.initialWaypoint = initialWaypoint
 
     # Set the particle angles such that the mean is in the center of a range
     def init_angular_uncertainity(self,(min,max)):
@@ -121,9 +120,9 @@ class WaypointNavigation:
         if self.useRobot:
             if(abs(angle) > 2.0):
                 print 'Turning ', round(angle,1),
-                robot.left(angle)
+                self.robot.left(angle)
             print ' moving forwards ', round(distance,1)
-            robot.forwards(distance)
+            self.robot.forwards(distance)
         if(abs(angle) > 2.0):
             self.particles.left(angle)
         self.particles.forwards(distance)
