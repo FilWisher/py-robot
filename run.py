@@ -8,7 +8,7 @@ from navigation import *
 from recognition import *
 
 ##########################
-run_option = 3           #
+run_option = 2           #
 use_robot = False        #
 ##########################
 
@@ -28,7 +28,7 @@ if run_option == 1:
 # 2. Test learning and recognition
 ######################################################
 if run_option == 2:
-  test = Recognition(False,waypoints_cw4,walls,60)
+  test = Recognition(False,waypoints_cw4,walls,20)
   # Learn all the waypoints
   test.sim_learn()
   # Try to recognise all the waypoints
@@ -44,22 +44,23 @@ if run_option == 3:
       return seq[n:] + seq[:n]
 
   # The angle at which the robot is started
-  start_angle = 100
+  start_angle = 50
   # The waypoint index at which the robot starts at
-  waypoint_idx = 3
+  waypoint_idx = 0
   x,y = waypoints_cw4[waypoint_idx]
   # Create a recognition class
-  rec = Recognition(False,waypoints_cw4,walls,200)
+  rec = Recognition(False,waypoints_cw4,walls,20)
   # Try and recognise the waypoint
   result = rec.sim_recognise(x,y,start_angle)
-  print 'Expected ', (waypoint_idx,start_angle), ' angle is between ', result
+  print 'Expected ', (waypoint_idx,(start_angle,start_angle)), ' got ', result
 
   # Shift the waypoints to account for the starting position
   waypoints = shift(waypoints_cw4,result[0]+1)
+  print result[0], waypoints
   # Number of particles for mcl
   noParticles = 100
   # Create a navigation class
-  nav = WaypointNavigation(use_robot,waypoints,result[0],noParticles)
+  nav = WaypointNavigation(use_robot,waypoints,result[0]-1,noParticles)
   # since we can only estimate an angular range, set up the particles
   # in this range
   nav.init_angular_uncertainity(result[1])

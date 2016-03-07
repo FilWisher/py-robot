@@ -1,106 +1,188 @@
+#!/usr/bin/env python
+
 import brickpi
+import sys
 import time
 
-interface=brickpi.Interface()
-interface.initialize()
+import os
+import math
 
-motors = [1,0]
-speed = 6.0
+class Robot(object):
 
-interface.motorEnable(motors[0])
-interface.motorEnable(motors[1])
-
-motorParams = interface.MotorAngleControllerParameters()
-motorParams.maxRotationAcceleration = 3.0
-motorParams.maxRotationSpeed = 6.0
-motorParams.feedForwardGain = 255/20.0
-motorParams.minPWM = 18.0
-motorParams.pidParameters.minOutput = -255
-motorParams.pidParameters.maxOutput = 255
-motorParams.pidParameters.k_p = 180
-motorParams.pidParameters.k_i = 360
-motorParams.pidParameters.k_d = 30
-
-interface.setMotorAngleControllerParameters(motors[0],motorParams)
-interface.setMotorAngleControllerParameters(motors[1],motorParams)
-
-distance_correction = 0.546
-angle_correction = 0.0689
-
-LEFT_WHEEL = 1.0
-RIGHT_WHEEL = 0.992
-
-# Ultrasonic sensor
-port = 0 # port which ultrasoic sensor is plugged in to
-interface.sensorEnable(port, brickpi.SensorType.SENSOR_ULTRASONIC)
-
-# go forwards
-def forwards(cm):
-    angle = cm * distance_correction
-    move(angle,angle)
-
-def backwards(cm):
-    angle = cm * distance_correction
-    move(-angle,-angle)
-
-def left(degree):
-    angle = degree * angle_correction
-    move(angle,-angle)
-
-def right(degree):
-    angle = degree * angle_correction
-    move(-angle,angle)
-
-def get_angles():
-    motorAngles = interface.getMotorAngles(motors)
-    a1 = motorAngles[0][0]
-    a2 = motorAngles[1][0]
-    return a1,a2
-
-def move(delta_a1,delta_a2):
     """
-    # delta_a2 corresponds to the left motor
-    # initial_a1, initial_a2 = get_angles()
-    target_a1 = initial_a1 + delta_a1
-    target_a2 = initial_a2 + delta_a2
-    interface.increaseMotorAngleReferences(motors, [delta_a1, delta_a2])
+        >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        EDIT the parameters below to calibrate the robot
+        <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    """
+    # Motor Movement correction. Radians per centimeter
+    RADS_PCM = 0.541
+    # Motor Rotation correction. Radians per degree
+    RADS_PDG = 0.0348
+    # Sonar Rotation correction.
+    SONAR_RADS_PDG = 0.027
 
-    dif1t1 = 0
-    dif2t1 = 0
-    while(True):
-        a1,a2 = get_angles()
-        dif1t2 = (target_a1-a1)
-        dif2t2 = (target_a2-a2)
-	#print dif1t1, dif2t1
-        #print dif1t2, dif2t2
-	#print
-        #if(abs(dif1) + abs(dif2) < 0.25):
-        if( dif1t1 == dif1t2 and dif2t1 == dif2t2):
-            break
-        time.sleep(0.3)
-        dif1t1 = (target_a1-a1)
-        dif2t1 = (target_a2-a2)
-        """
-    angle1 = distance_correction * delta_a1
-    angle2 = distance_correction * delta_a2
+    # SENSOR port
+    port = 3
 
-    interface.increaseMotorAngleReferences(motors, [angle1*LEFT_WHEEL, angle2*RIGHT_WHEEL])
+    # Wheel adjustments
+    LEFT_WHEEL = 1.0
+    RIGHT_WHEEL = 0.991
 
-def getSensorMeasurement():
-	usReading = interface.getSensorValue(port)
-	time.sleep(0.1)
-    # 18 is distance of sensor from center of rotation
-	return usReading[0] + 18
+    # Robot speed
+    acceleration = 6.0
+    speed = 12.0
 
+    # Robot PCI
+    kp = 180
+    ki = 360
+    kd = 30
 
-#function to draw a square
-def square(cm):
+    """
+        END OF ROBOT PARAMETERS
+    """
 
-    forwards(cm)
-    right(90)
-    forwards(cm)
-    right(90)
-    forwards(cm)
-    right(90)
-    forwards(cm)
-    right(90)
+    # Initialized in init
+    interface = []
+    motors = []
+
+    # Robot init and exit
+    def __init__(self):
+        self.interface = brickpi.Interface()
+        self.interface.initialize()
+
+        self.motors = self.setup_motors()
+        self.setup_sonar()
+
+    def __exit__(self, type, value, traceback):
+        self.interface.terminate()
+
+    def setup_motors(self):
+        motors = [1, 0]
+
+        self.interface.motorEnable(motors[0])
+        self.interface.motorEnable(motors[1])
+        # self.interface.motorEnable(motors[2])
+
+        motorParams = self.interface.MotorAngleControllerParameters()
+        motorParams.maxRotationAcceleration = self.speed
+        motorParams.maxRotationSpeed = self.acceleration
+        motorParams.feedForwardGain = 255/20.0
+        motorParams.minPWM = 18.0
+        motorParams.pidParameters.minOutput = -255
+        motorParams.pidParameters.maxOutput = 255
+        motorParams.pidParameters.k_p = self.kp
+        motorParams.pidParameters.k_i = self.ki
+        motorParams.pidParameters.k_d = self.kd
+
+        self.interface.setMotorAngleControllerParameters(motors[0], motorParams)
+        self.interface.setMotorAngleControllerParameters(motors[1], motorParams)
+        # self.interface.setMotorAngleControllerParameters(motors[2], motorParams)
+
+        return motors
+
+    def setup_sonar(self):
+        self.interface.sensorEnable(self.port, brickpi.SensorType.SENSOR_ULTRASONIC)
+    """
+        HELPER Functions
+    """
+
+    # Motor Related
+    def validateMove(self):
+        while not self.interface.motorAngleReferencesReached(self.motors):
+            time.sleep(0.1)
+
+    def get_angles(self):
+        angles = self.interface.getMotorAngles(self.motors)
+        return angles[0][0], angles[1][0]
+
+    def startLogging(self, logfile):
+        self.interface.startLogging(logfile)
+
+    def stopLogging(self):
+        self.interface.stopLogging()
+
+    # Sonar Related
+    def getSensorMeasurement(self):
+        # 18 is distance of sensor from center of rotation
+        time.sleep(0.1)
+    	return self.interface.getSensorValue(self.port)
+   
+    def measure360(self):
+        rads = self.RADS_PDG*360/20
+        
+        for i in range(0,20):
+            self.interface.increaseMotorAngleReferences(self.motors, [-rads, rads])
+            while not self.interface.motorAngleReferenceReached(self.motors):
+                print self.getSensorMeasurement()
+                time.sleep(0.1)
+
+    """
+       Movement functions
+    """
+    def move(self, distance):
+        rads = self.RADS_PCM * distance
+
+        self.interface.increaseMotorAngleReferences(self.motors, [rads*self.LEFT_WHEEL, rads*self.RIGHT_WHEEL])
+        self.validateMove()
+
+    def turn(self, angle):
+        rads = self.RADS_PDG * angle
+
+        self.interface.increaseMotorAngleReferences(self.motors, [-rads, rads])
+        self.validateMove()
+
+    # Movement by name
+    def forwards(self, cm):
+        self.move(cm)
+
+    def backwards(self, cm):
+        self.move(-cm)
+
+    def left(self, degree):
+        self.turn(degree)
+
+    def right(self, degree):
+        self.turn(-degree)
+
+    #function to draw a square
+    def square(self, cm):
+        self.forwards(cm)
+        self.right(90)
+        self.forwards(cm)
+        self.right(90)
+        self.forwards(cm)
+        self.right(90)
+        self.forwards(cm)
+        self.right(90)
+
+if __name__ == "__main__":
+    def print_usage():
+        print "== USAGE =="
+        print "r angle (in degrees)"
+        print "m distance (in cm)"
+
+    r = Robot()
+
+    try:
+        if (sys.argv[1] == 't'):
+            r.turn(float(sys.argv[2]))
+        elif (sys.argv[1] == 'm'):
+            r.move(float(sys.argv[2]))
+        elif (sys.argv[1] == 'f'):
+            r.forwards(float(sys.argv[2]))
+        elif (sys.argv[1] == 'b'):
+            r.backwards(float(sys.argv[2]))
+        elif (sys.argv[1] == 'l'):
+            r.left(float(sys.argv[2]))
+        elif (sys.argv[1] == 'r'):
+            r.right(float(sys.argv[2]))
+        elif (sys.argv[1] == 's'):
+            print "hey"
+            r.measure360()
+        elif (sys.argv[1] == 'z'):
+            print "hey"
+            print r.getSensorMeasurement()
+        else:
+            print_usage()
+    except:
+        print_usage()

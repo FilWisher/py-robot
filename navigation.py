@@ -46,7 +46,6 @@ class WaypointNavigation:
         for i in xrange(N):
             x, y, theta = self.particles.data[i]
             self.particles.data[i] = (x, y, min + step*i)
-            print self.particles.data[i]
 
 
     def navigate(self):
