@@ -1,5 +1,5 @@
 # robot
-uncertain robot on brickpi
+uncertain robot on brickpi which can navigate waypoints in its sleep
 
 ### File structure
 * `archive/` - needs sorting
